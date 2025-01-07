@@ -54,7 +54,12 @@ export const NewsHome = () => {
     }, []);
 
     return (
-        <Grid container direction="row" className={styles.news}>
+        <Grid
+            container
+            direction="row"
+            className={styles.news}
+            justifyContent={"center"}
+        >
             {posts.map((post, index) => (
                 <Grid item xs={6} key={post.id}>
                     <Card
@@ -146,6 +151,7 @@ export const NewsHome = () => {
                     </Card>
                 </Grid>
             ))}
+            <Button fullWidth>Pokaż wszystko</Button>
         </Grid>
     );
 };
