@@ -1,5 +1,12 @@
 "use client";
+
+// CORE
 import * as React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
+// MATERIAL
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -10,10 +17,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import AdbIcon from "@mui/icons-material/Adb";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import styles from "./navbar.module.css";
+
+// COMPONENTS
+import { ChangeLanguageFlag } from "./ChangeLanguageFlag";
 
 interface NavLinkParams {
     name: string;
@@ -197,6 +205,30 @@ export const ResponsiveAppBar = () => {
                                 {navLink.name}
                             </Button>
                         ))}
+                    </Box>
+                    <Box
+                        sx={{
+                            my: 2,
+                            display: "flex",
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: {
+                                    xs: "none",
+                                    sm: "flex",
+                                },
+                                mr: "30px",
+                            }}
+                        >
+                            <a
+                                href="https://www.facebook.com/FederPoland"
+                                target="_blank"
+                            >
+                                <FacebookIcon className={styles.mediaIcon} />
+                            </a>
+                        </Box>
+                        <ChangeLanguageFlag />
                     </Box>
                 </Toolbar>
             </Container>

@@ -1,5 +1,12 @@
+"use client";
+import Management from "@/components/management/Management";
+
 const page = () => {
-    return <div>rules</div>;
+    return (
+        <>
+            <Management />
+        </>
+    );
 };
 
 export default page;
