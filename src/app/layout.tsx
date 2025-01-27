@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { PostsProvider } from "@/contexts/PostsContext";
+import { AuthContextProvider } from "@/contexts/AuthContext";
+import { ResponsiveAppBar } from "@/components/navbar/Navbar";
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -16,7 +18,14 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body>
-                <PostsProvider>{children}</PostsProvider>
+                <AuthContextProvider>
+                    <PostsProvider>
+                        <div>
+                            <ResponsiveAppBar />
+                            {children}
+                        </div>
+                    </PostsProvider>
+                </AuthContextProvider>
             </body>
         </html>
     );

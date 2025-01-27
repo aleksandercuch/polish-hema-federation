@@ -3,6 +3,7 @@
 // CORE
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 //TYPES
 import { Post } from "@/types/post.type";
@@ -12,13 +13,15 @@ import { mockedPosts } from "@/mocks/posts.mocks";
 
 // STYLES
 import styles from "./news.module.css";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Button from "@mui/material/Button";
+import {
+    Button,
+    Grid,
+    Box,
+    Typography,
+    CardMedia,
+    CardContent,
+    Card,
+} from "@mui/material";
 
 // CONTEXT
 import { usePost } from "@/contexts/PostsContext";
@@ -54,9 +57,14 @@ export const NewsHome = () => {
     }, []);
 
     return (
-        <Grid container direction="row" className={styles.news}>
+        <Grid
+            container
+            direction="row"
+            className={styles.news}
+            justifyContent={"center"}
+        >
             {posts.map((post, index) => (
-                <Grid item xs={6} key={post.id}>
+                <Grid item xs={12} md={6} key={post.id}>
                     <Card
                         sx={{
                             display: "flex",
@@ -94,7 +102,7 @@ export const NewsHome = () => {
                                                     : "error"
                                             }
                                         >
-                                            {post.title}
+                                            {post.titlePL}
                                         </Typography>
                                     </Grid>
                                     <Grid
@@ -113,7 +121,7 @@ export const NewsHome = () => {
                                                     maxWidth: "250px",
                                                 }}
                                             >
-                                                {post.intro}
+                                                {post.introPL}
                                             </Typography>
                                         </Grid>
                                         <Grid item xs={6}>
@@ -137,7 +145,7 @@ export const NewsHome = () => {
                         </Box>
                         <CardMedia
                             component="img"
-                            image={post.images[0]}
+                            image={post.mainFile}
                             alt="Post picture error"
                             sx={{
                                 width: "50%",
@@ -146,6 +154,15 @@ export const NewsHome = () => {
                     </Card>
                 </Grid>
             ))}
+            <Link href={"/posts"}>
+                <Button
+                    className={styles.postsButton}
+                    variant="outlined"
+                    fullWidth
+                >
+                    Wszystkie posty
+                </Button>
+            </Link>
         </Grid>
     );
 };
