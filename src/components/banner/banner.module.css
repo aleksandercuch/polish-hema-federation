@@ -1,5 +1,13 @@
 .banner {
     width: 100%;
-    height: 100vh;
-    background-color: red;
+    height: calc(100vh - 100px);
+    position: relative;
+    top: 100px;
+    margin-bottom: 100px;
+}
+.subBanner {
+    width: 100%;
+    height: calc(100vh - 100px);
+    position: fixed;
+    top: 100px;
 }

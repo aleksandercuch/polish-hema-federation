@@ -1,10 +1,11 @@
+import Grid from "@mui/material/Grid/Grid";
 import styles from "./banner.module.css";
 import Image from "next/image";
 
-export const Banner = () => {
+export const SubPageBanner = () => {
     return (
-        <div className={styles.banner}>
+        <Grid item className={styles.subBanner}>
             <Image src="/banner.jpg" alt="Example image" fill priority />
-        </div>
+        </Grid>
     );
 };
