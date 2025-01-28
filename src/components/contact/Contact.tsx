@@ -1,11 +1,8 @@
 // CORE
 "use client";
-import { ComponentType, FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { convertFromRaw, EditorState, RawDraftContentState } from "draft-js";
 //import { UserAuth } from "@/context/auth-context";
-import dynamic from "next/dynamic";
-import { EditorProps } from "react-draft-wysiwyg";
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import {
@@ -21,9 +18,6 @@ import styles from "@/app/subpage.module.css";
 import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
 import EmailIcon from "@mui/icons-material/Email";
 import { MuiFileInput } from "mui-file-input";
-
-// @ts-ignore
-import draftToHtml from "draftjs-to-html";
 
 //FIREBASE
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -143,7 +137,7 @@ const Contact = () => {
                 const dataArray = querySnapshot.docs.map((doc) => ({
                     id: doc.data().id,
                     ...doc.data(), // Spread the document data
-                }));
+                })); // @ts-ignore
                 setContactList(dataArray); // Logs the collection as an array
             })
             .catch((error) => {

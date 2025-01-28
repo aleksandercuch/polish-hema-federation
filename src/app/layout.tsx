@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import { PostsProvider } from "@/contexts/PostsContext";
 import { AuthContextProvider } from "@/contexts/AuthContext";

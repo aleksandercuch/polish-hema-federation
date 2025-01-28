@@ -6,12 +6,7 @@ import styles from "@/app/subpage.module.css";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { Controller, useForm } from "react-hook-form";
-import {
-    convertFromRaw,
-    EditorState,
-    RawDraftContentState,
-    convertToRaw,
-} from "draft-js";
+import { EditorState, RawDraftContentState, convertToRaw } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
 // MOCKS
@@ -29,7 +24,7 @@ import {
     FormControl,
     TextField,
 } from "@mui/material";
-import ImageGallery from "react-image-gallery";
+//import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
 
 // UTILS
@@ -234,14 +229,12 @@ const page = () => {
                                         }}
                                         render={({ field }) => (
                                             <TextField
-                                                label="Opis PL"
+                                                label="Tytuł PL"
                                                 variant="outlined"
                                                 multiline
                                                 rows={3}
                                                 defaultValue={
-                                                    post
-                                                        ? post.descriptionPL
-                                                        : ""
+                                                    post ? post.titlePL : ""
                                                 }
                                                 size="small"
                                                 type="text"
@@ -264,7 +257,7 @@ const page = () => {
                                         }}
                                         render={({ field }) => (
                                             <TextField
-                                                label="Opis PL"
+                                                label="Intro PL"
                                                 variant="outlined"
                                                 multiline
                                                 rows={3}
@@ -320,7 +313,7 @@ const page = () => {
                                         }}
                                         render={({ field }) => (
                                             <TextField
-                                                label="Opis PL"
+                                                label="Tytuł ENG"
                                                 variant="outlined"
                                                 multiline
                                                 rows={3}
@@ -341,14 +334,14 @@ const page = () => {
                                         )}
                                     />
                                     <Controller
-                                        name={"descriptionENG"}
+                                        name={"introENG"}
                                         control={control}
                                         rules={{
                                             required: "Podaj opis!",
                                         }}
                                         render={({ field }) => (
                                             <TextField
-                                                label="Opis PL"
+                                                label="Intro ENG"
                                                 variant="outlined"
                                                 multiline
                                                 rows={3}
