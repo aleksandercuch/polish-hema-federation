@@ -1,5 +1,4 @@
 "use client";
-import dynamic from "next/dynamic";
 // COMPONENTS
 import { Banner } from "@/components/banner/Banner";
 import { NewsHome } from "@/components/news/NewsHome";
