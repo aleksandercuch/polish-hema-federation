@@ -28,37 +28,12 @@ import { SubPageBanner } from "@/components/banner/SubPageBanner";
 
 // UTILS
 import { Editor } from "@/utils/editor/editorImport";
+import { convertDraftToHtmlWithEmptyBlocks } from "@/utils/editor/convertFunction";
 
 interface pageParams {
     descriptionPL: any;
     descriptionENG: any;
 }
-
-const preprocessRawContentState = (
-    rawContentState: RawDraftContentState
-): RawDraftContentState => {
-    const modifiedBlocks = rawContentState.blocks.map((block) => {
-        if (block.type === "unstyled" && !block.text.trim()) {
-            return {
-                ...block,
-                text: "\u200B", // Zero-width space character to preserve empty blocks
-            };
-        }
-        return block;
-    });
-
-    return {
-        ...rawContentState,
-        blocks: modifiedBlocks,
-    };
-};
-
-const convertDraftToHtmlWithEmptyBlocks = (
-    description: RawDraftContentState
-): string => {
-    const preprocessedContentState = preprocessRawContentState(description);
-    return draftToHtml(preprocessedContentState);
-};
 
 const Rules = () => {
     const [editorStatePL, setEditorStatePL] = useState(

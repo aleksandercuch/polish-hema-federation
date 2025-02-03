@@ -1,7 +1,7 @@
 "use client";
 // COMPONENTS
 import { Banner } from "@/components/banner/Banner";
-import { NewsHome } from "@/components/news/NewsHome";
+import { NewsHome } from "@/components/posts/NewsHome";
 import { Schedule } from "@/components/schedule/Schedule";
 import OpenLayersMap from "@/components/map/Map";
 

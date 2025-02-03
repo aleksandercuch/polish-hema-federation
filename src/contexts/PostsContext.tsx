@@ -1,16 +1,16 @@
 "use client";
-import { Post } from "@/types/post.type";
+import { PostT } from "@/types/post.type";
 import { defaultPostValues } from "@/utils/post/postDefaultValues";
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface PostsContextType {
-    post: Post;
-    setPost: React.Dispatch<React.SetStateAction<Post>>;
+    post: PostT;
+    setPost: React.Dispatch<React.SetStateAction<PostT>>;
 }
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
 export function PostsProvider({ children }: { children: ReactNode }) {
-    const [post, setPost] = useState<Post>(defaultPostValues);
+    const [post, setPost] = useState<PostT>(defaultPostValues);
 
     return (
         <PostsContext.Provider value={{ post, setPost }}>
