@@ -47,12 +47,12 @@ import { defaultPostValues } from "@/utils/post/postDefaultValues";
 
 // COMPONENTS
 import { Loader } from "../loader/loader";
-import { POST_MODE } from "@/utils/constants/posteModeEnum";
+import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 import { addRandomSuffix } from "@/utils/post/addRandomSuffix";
 
 interface IProps {
     closeFormControl: Dispatch<SetStateAction<boolean>>;
-    mode: POST_MODE;
+    mode: OPERATION_MODE;
 }
 
 const arraysEqual = (arr1: string[], arr2: string[]): boolean => {
@@ -88,7 +88,7 @@ const PostFormControl = (props: IProps) => {
 
         try {
             const postRef = post.id ? doc(db, "posts", post.id) : null;
-            const isEditMode = props.mode === POST_MODE.Edit;
+            const isEditMode = props.mode === OPERATION_MODE.Edit;
             let mainFileUrl = post.mainFile; // Default to existing main file
 
             // Handle Main File Upload
@@ -219,11 +219,11 @@ const PostFormControl = (props: IProps) => {
     };
 
     useEffect(() => {
-        if (props.mode === POST_MODE.Add) {
+        if (props.mode === OPERATION_MODE.Add) {
             post.id && setPost(defaultPostValues);
             reset();
         }
-        if (props.mode === POST_MODE.Edit) {
+        if (props.mode === OPERATION_MODE.Edit) {
             fetchDescriptionsToEditor();
         }
     }, []);

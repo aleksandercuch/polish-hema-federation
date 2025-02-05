@@ -27,7 +27,7 @@ import {
     startAfter,
 } from "firebase/firestore";
 import { db } from "../../../firebase/config/clientApp";
-import { POST_MODE } from "@/utils/constants/posteModeEnum";
+import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 
 const POSTS_PER_PAGE = 10;
 
@@ -254,7 +254,7 @@ const ListOfPosts = () => {
                         ) : (
                             <Grid item sx={{ width: "100%" }}>
                                 <PostFormControl
-                                    mode={POST_MODE.Add}
+                                    mode={OPERATION_MODE.Add}
                                     closeFormControl={setAddPostModeActive}
                                 />
                             </Grid>

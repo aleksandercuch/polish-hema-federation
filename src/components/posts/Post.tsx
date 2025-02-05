@@ -17,7 +17,7 @@ import "react-image-gallery/styles/css/image-gallery.css";
 
 // FIREBASE
 import { collection, doc, getDoc, deleteDoc } from "firebase/firestore";
-import { ref, deleteObject, getMetadata } from "firebase/storage";
+import { ref, deleteObject } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
 // COMPONENTS
 import { Loader } from "@/components/loader/loader";
@@ -29,8 +29,9 @@ import ImageGallery from "react-image-gallery";
 import { convertDraftToHtmlWithEmptyBlocks } from "@/utils/editor/convertFunction";
 import { convertImagesToGallery } from "@/utils/post/convertImagesToGallery";
 import { convertFirebaseTimestamp } from "@/utils/post/convertFirebaseTimestamp";
-import { POST_MODE } from "@/utils/constants/posteModeEnum";
+import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 import { defaultPostValues } from "@/utils/post/postDefaultValues";
+import { fileExists } from "@/utils/storage/fileExistInStorage";
 
 const Post = () => {
     const { id } = useParams(); // Get post ID from the URL
@@ -48,24 +49,10 @@ const Post = () => {
         if (!confirmDelete) return;
 
         try {
-            // Function to check if a file exists before deleting
-            const fileExists = async (filePath: string) => {
-                try {
-                    await getMetadata(ref(storage, filePath));
-                    return true;
-                } catch (error) {
-                    console.warn(`File not found: ${filePath}`);
-                    return false;
-                }
-            };
-
             // Delete main file if it exists
-            console.log("POSTMAINFILE", post.mainFile);
             if (post.mainFile) {
-                console.log("Checking main file:", post.mainFile);
                 if (await fileExists(post.mainFile as string)) {
                     await deleteObject(ref(storage, post.mainFile as string));
-                    console.log("Main file deleted:", post.mainFile);
                 }
             }
 
@@ -73,7 +60,6 @@ const Post = () => {
             if (post.images && post.images.length > 0) {
                 await Promise.all(
                     post.images.map(async (imageUrl) => {
-                        console.log("Checking image:", imageUrl);
                         if (await fileExists(imageUrl as string)) {
                             await deleteObject(
                                 ref(storage, imageUrl as string)
@@ -264,7 +250,7 @@ const Post = () => {
                                 </Grid>
                             ) : (
                                 <PostFormControl
-                                    mode={POST_MODE.Edit}
+                                    mode={OPERATION_MODE.Edit}
                                     closeFormControl={setIsEditing}
                                 />
                             )}
