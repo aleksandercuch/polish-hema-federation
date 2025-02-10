@@ -76,14 +76,14 @@ const TextEditorComponent = (props: pageParams) => {
             .then(() => {
                 alert("Zmieniłeś zasady!");
                 setIsEditing(false);
-                fetchRules();
+                fetchEditor();
             })
             .catch((error) => {
                 alert(error);
             });
     };
 
-    const fetchRules = async () => {
+    const fetchEditor = async () => {
         const collectionRef = collection(db, props.collectionName);
         const docRef = doc(collectionRef, props.collectionId);
 
@@ -104,7 +104,7 @@ const TextEditorComponent = (props: pageParams) => {
             });
     };
 
-    const fetchRulesToEditor = async () => {
+    const fetchToEditor = async () => {
         setEditorStatePL(
             EditorState.createWithContent(
                 convertFromRaw(elements?.descriptionPL)
@@ -119,12 +119,12 @@ const TextEditorComponent = (props: pageParams) => {
 
     useEffect(() => {
         if (isEditing) {
-            fetchRulesToEditor();
+            fetchToEditor();
         }
     }, [isEditing]);
 
     useEffect(() => {
-        fetchRules();
+        fetchEditor();
     }, []);
     return (
         <>

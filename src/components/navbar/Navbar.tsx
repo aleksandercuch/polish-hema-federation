@@ -70,6 +70,11 @@ const navLinks: NavLinkParams[] = [
         url: "/judges",
     },
     {
+        name: "Cooperation",
+        isReflink: false,
+        url: "/cooperation",
+    },
+    {
         name: "Clubs",
         isReflink: true,
         url: "/",
