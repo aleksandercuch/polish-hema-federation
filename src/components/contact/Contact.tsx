@@ -51,7 +51,7 @@ const Contact = () => {
     const [contactList, setContactList] = useState<contactParams[]>([]);
     const [contactToEdition, setContactToEdition] = useState<contactParams>();
     const [file, setFile] = useState<File>();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const [isEditing, setIsEditing] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
@@ -78,14 +78,27 @@ const Contact = () => {
 
     const deleteContact = async (data: contactParams) => {
         // Delete main file if it exists
-        setLoading(true);
-        if (data.file) {
+        if (!data.file) return;
+        else {
+            const confirmDelete = window.confirm(
+                "Czy na pewno chcesz usunąć ten kontakt?"
+            );
+            if (!confirmDelete) return;
+
+            setLoading(true);
+
             if (await fileExists(data.file as string)) {
-                await deleteObject(ref(storage, data.file as string));
+                await deleteObject(ref(storage, data.file as string)).then(
+                    () => {
+                        deleteDoc(doc(db, "contact", data.id)).then(() => {
+                            fetchContact().then(() => setLoading(false));
+                        });
+                    }
+                );
+            } else {
+                setLoading(false);
             }
-            await deleteDoc(doc(db, "contact", data.id));
         }
-        setLoading(false);
     };
     const submitForm = async (data: contactParams) => {
         setLoading(true);
@@ -128,7 +141,7 @@ const Contact = () => {
                     email: data.email,
                     file: downloadURL || contactToEdition.file,
                 });
-
+                setIsEditing(false);
                 alert(`Zakończyłeś edycję ${data.name}!`);
             } else {
                 // Creating a new contact
@@ -140,18 +153,17 @@ const Contact = () => {
                     email: data.email,
                     file: downloadURL,
                 });
-
+                setIsAdding(false);
                 alert("Stworzyłeś nowy kontakt!");
                 reset(); // Reset form fields after creation
             }
 
             setContactToEdition(undefined);
-            setIsEditing(false);
         } catch (error) {
             console.error("Wystąpił błąd:", error);
             alert(`Wystąpił błąd: ${error}`);
         }
-        setLoading(false);
+        fetchContact().then(() => setLoading(false));
     };
 
     const editContact = (data: contactParams) => {
@@ -230,9 +242,7 @@ const Contact = () => {
                             </Grid>
                         ) : (
                             <>
-                                {!isAdding &&
-                                !isEditing &&
-                                contactList.length ? (
+                                {!isAdding && !isEditing ? (
                                     <>
                                         {contactList.map((element) => (
                                             <Grid

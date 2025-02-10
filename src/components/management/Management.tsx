@@ -18,15 +18,12 @@ import {
     TextField,
 } from "@mui/material";
 import styles from "@/app/subpage.module.css";
-import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
-import EmailIcon from "@mui/icons-material/Email";
-import { MuiFileInput } from "mui-file-input";
 
 // @ts-ignore
 import draftToHtml from "draftjs-to-html";
 
 //FIREBASE
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { deleteObject, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
 import {
     addDoc,
@@ -52,6 +49,15 @@ import {
     sectionParams,
 } from "@/types/management.interface";
 import { MemberForm } from "@/utils/forms/memberForm";
+import { fileExists } from "@/utils/storage/fileExistInStorage";
+
+const removeElementAtIndex = (arr: memberParams[], index: number) => {
+    if (index < 0 || index >= arr.length) {
+        console.error("Index out of bounds");
+        return arr;
+    }
+    return arr.slice(0, index).concat(arr.slice(index + 1));
+};
 
 const Management = () => {
     const [sectionsList, setSectionsList] = useState<sectionParams[]>([]);
@@ -62,26 +68,92 @@ const Management = () => {
     const [mode, setMode] = useState<OPERATION_MODE>(OPERATION_MODE.None);
     const [loading, setLoading] = useState(false);
 
+    const handleDeleteMember = async (
+        section: sectionParams,
+        member: memberParams
+    ) => {
+        if (!section.id) return;
+
+        const confirmDelete = window.confirm(
+            `Czy na pewno chcesz usunąć ${member.name}?`
+        );
+        if (!confirmDelete) return;
+        setLoading(true);
+
+        try {
+            // Delete image if  exists
+            if (member.file && (await fileExists(member.file))) {
+                await deleteObject(ref(storage, member.file));
+            }
+
+            // Update document
+            const updatedMembers = removeElementAtIndex(
+                section.members,
+                member.id
+            );
+            // Updating an existing member
+            await updateDoc(doc(db, "management", section.id), {
+                name: section.name,
+                members: updatedMembers,
+            });
+
+            alert(`Zakończyłeś usuwanie!`);
+            fetchSections().then(() => setLoading(false));
+        } catch (error) {
+            alert(`Wystąpił błąd podczas usuwania ${member.name}`);
+        }
+    };
     const handleAddMember = (section: sectionParams) => {
         setMode(OPERATION_MODE.Add);
         setSectionToEdition(section);
     };
 
-    const handleDeleteSection = async (id: string) => {
-        if (!id) return;
-
-        const confirmDelete = window.confirm(
-            "Czy na pewno chcesz usunąć sekcję?"
-        );
-        if (!confirmDelete) return;
-
-        await deleteDoc(doc(db, "management", id)).then(() => {
-            fetchSections();
-        });
-        alert("Sekcja została usunięta.");
+    const handleEditSection = (section: sectionParams) => {
+        setMode(OPERATION_MODE.Edit);
+        setSectionToEdition(section);
     };
 
-    const fetchSections = () => {
+    const handleEditMember = (section: sectionParams, member: memberParams) => {
+        setMode(OPERATION_MODE.Edit);
+        setSectionToEdition(section);
+        setMemberToEdition(member);
+    };
+
+    const handleDeleteSection = async (section: sectionParams) => {
+        if (!section.id) return;
+
+        const confirmDelete = window.confirm(
+            "Czy na pewno chcesz usunąć tą sekcję?"
+        );
+        if (!confirmDelete) return;
+        setLoading(true);
+        try {
+            // Delete images if they exist
+            if (section.members && section.members.length > 0) {
+                await Promise.all(
+                    section.members.map(async (member) => {
+                        if (await fileExists(member.file)) {
+                            await deleteObject(ref(storage, member.file));
+                        }
+                    })
+                );
+            }
+
+            // Delete the Firestore document
+            await deleteDoc(doc(db, "management", section.id)).then(() => {
+                fetchSections();
+                alert("Sekcja została usunięta.");
+            });
+            setLoading(false);
+
+            // Redirect or update UI after deletion
+        } catch (error) {
+            console.error("Błąd podczas usuwania posta:", error);
+            alert("Wystąpił błąd podczas usuwania posta.");
+        }
+    };
+
+    const fetchSections = async () => {
         const managementCollection = collection(db, "management");
 
         getDocs(managementCollection)
@@ -91,6 +163,7 @@ const Management = () => {
                     ...doc.data(), // Spread the document data
                 })); // @ts-ignore
                 setSectionsList(dataArray); // Logs the collection as an array
+                console.log(dataArray);
             })
             .catch((error) => {
                 console.error("Error retrieving collection: ", error);
@@ -195,8 +268,8 @@ const Management = () => {
                                                             mt: 2,
                                                         }}
                                                         onClick={() =>
-                                                            setMode(
-                                                                OPERATION_MODE.Edit
+                                                            handleEditSection(
+                                                                section
                                                             )
                                                         }
                                                     >
@@ -234,7 +307,7 @@ const Management = () => {
                                                         }}
                                                         onClick={() =>
                                                             handleDeleteSection(
-                                                                section.id
+                                                                section
                                                             )
                                                         }
                                                     >
@@ -303,22 +376,50 @@ const Management = () => {
                                                             justifyContent:
                                                                 "center",
                                                         }}
+                                                        spacing={2}
                                                     >
-                                                        <Button
-                                                            type="submit"
-                                                            color="error"
-                                                            variant="outlined"
-                                                            size="small"
-                                                            sx={{
-                                                                mb: 2,
-                                                                mt: 2,
-                                                            }}
-                                                            // onClick={() =>
-                                                            //    // editContact(element)
-                                                            // }
-                                                        >
-                                                            Edytuj {member.name}
-                                                        </Button>
+                                                        {" "}
+                                                        <Grid item>
+                                                            <Button
+                                                                type="submit"
+                                                                color="error"
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    mb: 2,
+                                                                    mt: 2,
+                                                                }}
+                                                                onClick={() =>
+                                                                    handleEditMember(
+                                                                        section,
+                                                                        member
+                                                                    )
+                                                                }
+                                                            >
+                                                                Edytuj{" "}
+                                                                {member.name}
+                                                            </Button>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Button
+                                                                type="submit"
+                                                                color="error"
+                                                                variant="contained"
+                                                                size="small"
+                                                                sx={{
+                                                                    mb: 2,
+                                                                    mt: 2,
+                                                                }}
+                                                                onClick={() =>
+                                                                    handleDeleteMember(
+                                                                        section,
+                                                                        member
+                                                                    )
+                                                                }
+                                                            >
+                                                                Usuń
+                                                            </Button>
+                                                        </Grid>
                                                     </Grid>
                                                 </Grid>
                                             ))}
@@ -381,10 +482,9 @@ const Management = () => {
                                         //EDITION
                                         <>
                                             {sectionToEdition &&
-                                            memberToEdition.id ? (
+                                            memberToEdition.id >= 0 ? (
                                                 // EDIT MEMBER
                                                 <>
-                                                    test
                                                     <MemberForm
                                                         mode={
                                                             OPERATION_MODE.Edit
@@ -401,6 +501,7 @@ const Management = () => {
                                             ) : (
                                                 // EDIT SECTION NAME
                                                 <>
+                                                    {memberToEdition.id}
                                                     <CreateSectionForm
                                                         mode={
                                                             OPERATION_MODE.Edit

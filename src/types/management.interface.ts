@@ -35,5 +35,5 @@ export const defaultMember = {
     descriptionENG: "",
     descriptionPL: "",
     file: "",
-    id: 0,
+    id: -1,
 };

@@ -125,15 +125,15 @@ export const MemberForm = (props: IProps) => {
             };
 
             if (props.mode === OPERATION_MODE.Edit && props.member) {
-                console.log("EDIT");
+                const updatedMembers = updateArrayElement(
+                    sectionMembers,
+                    props.member.id,
+                    newMember
+                );
                 // Updating an existing member
                 await updateDoc(doc(db, "management", props.section.id), {
                     name: props.section.name,
-                    members: updateArrayElement(
-                        sectionMembers,
-                        props.member.id,
-                        newMember
-                    ),
+                    members: updatedMembers,
                 });
 
                 alert(`Zakończyłeś edycję ${data.name}!`);
