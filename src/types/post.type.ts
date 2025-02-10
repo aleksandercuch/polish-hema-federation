@@ -1,4 +1,4 @@
-export type Post = {
+export type PostT = {
     id: string;
     titleENG: string;
     titlePL: string;
@@ -6,7 +6,7 @@ export type Post = {
     introPL: string;
     descriptionENG: any;
     descriptionPL: any;
-    visible: boolean;
     mainFile: any;
     date: Date;
+    images: File[] | string[];
 };

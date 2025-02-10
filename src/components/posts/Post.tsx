@@ -1,0 +1,267 @@
+"use client";
+
+// CORE
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import styles from "@/app/subpage.module.css";
+import Link from "next/link";
+import dayjs from "dayjs";
+import { useParams, useRouter } from "next/navigation";
+
+// CONTEXT
+import { usePost } from "@/contexts/PostsContext";
+
+// MATERIAL UI
+import { Button, Grid, Paper, Typography, Box } from "@mui/material";
+import "react-image-gallery/styles/css/image-gallery.css";
+
+// FIREBASE
+import { collection, doc, getDoc, deleteDoc } from "firebase/firestore";
+import { ref, deleteObject } from "firebase/storage";
+import { db, storage } from "../../../firebase/config/clientApp";
+// COMPONENTS
+import { Loader } from "@/components/loader/loader";
+import PostFormControl from "./PostFormControl";
+import { PostT } from "@/types/post.type";
+import ImageGallery from "react-image-gallery";
+
+// UTILS
+import { convertDraftToHtmlWithEmptyBlocks } from "@/utils/editor/convertFunction";
+import { convertImagesToGallery } from "@/utils/post/convertImagesToGallery";
+import { convertFirebaseTimestamp } from "@/utils/post/convertFirebaseTimestamp";
+import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
+import { defaultPostValues } from "@/utils/post/postDefaultValues";
+import { fileExists } from "@/utils/storage/fileExistInStorage";
+
+const Post = () => {
+    const { id } = useParams(); // Get post ID from the URL
+    const [loading, setLoading] = useState(true);
+    const { post, setPost } = usePost();
+    const [isEditing, setIsEditing] = useState(false);
+    const router = useRouter();
+
+    const deletePost = async () => {
+        if (!post?.id) return;
+
+        const confirmDelete = window.confirm(
+            "Czy na pewno chcesz usunąć ten post?"
+        );
+        if (!confirmDelete) return;
+
+        try {
+            // Delete main file if it exists
+            if (post.mainFile) {
+                if (await fileExists(post.mainFile as string)) {
+                    await deleteObject(ref(storage, post.mainFile as string));
+                }
+            }
+
+            // Delete images if they exist
+            if (post.images && post.images.length > 0) {
+                await Promise.all(
+                    post.images.map(async (imageUrl) => {
+                        if (await fileExists(imageUrl as string)) {
+                            await deleteObject(
+                                ref(storage, imageUrl as string)
+                            );
+                            console.log("Image deleted:", imageUrl);
+                        }
+                    })
+                );
+            }
+
+            // Delete the Firestore document
+            await deleteDoc(doc(db, "posts", post.id));
+            alert("Post został usunięty.");
+            router.push(`/posts`);
+            setPost(defaultPostValues);
+
+            // Redirect or update UI after deletion
+        } catch (error) {
+            console.error("Błąd podczas usuwania posta:", error);
+            alert("Wystąpił błąd podczas usuwania posta.");
+        }
+    };
+
+    // Fetch post from Firestore
+    const fetchPost = async () => {
+        if (!id) return;
+        setLoading(true);
+
+        try {
+            const postId = id as string; // Ensure id is a string
+            const postDocRef = doc(db, "posts", postId);
+            const docSnap = await getDoc(postDocRef);
+
+            if (docSnap.exists()) {
+                const postData = docSnap.data();
+
+                // Ensure the fetched data matches the PostT type
+                const post: PostT = {
+                    id: postId,
+                    titleENG: postData.titleENG || "",
+                    titlePL: postData.titlePL || "",
+                    introENG: postData.introENG || "",
+                    introPL: postData.introPL || "",
+                    descriptionENG: postData.descriptionENG || "",
+                    descriptionPL: postData.descriptionPL || "",
+                    mainFile: postData.mainFile || "",
+                    images: postData.images || [],
+                    date: postData.date,
+                };
+                console.log(post);
+                setPost(post); // Now correctly typed
+            } else {
+                console.log("No such post found!");
+            }
+        } catch (error) {
+            console.error("Error fetching post:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!post?.id) {
+            fetchPost();
+        }
+        post.id && setLoading(false);
+        console.log(loading);
+    }, []); // Runs when id changes
+
+    return (
+        <Grid container className={styles.mainContainer}>
+            <Grid item className={styles.postBanner}>
+                <Image src="/banner.jpg" alt="Example image" fill priority />
+            </Grid>
+            <Paper className={styles.subpageBackground}>
+                <Paper>
+                    <Link href={"/posts"}>
+                        <Button>Wszystkie posty</Button>
+                    </Link>
+                </Paper>
+                <Paper className={styles.postContainer}>
+                    {post.id && !loading ? (
+                        <>
+                            {!isEditing ? (
+                                <Grid
+                                    container
+                                    direction="column"
+                                    spacing={8}
+                                    sx={{
+                                        justifyContent: "flex-start",
+                                        alignItems: "flex-start",
+                                    }}
+                                >
+                                    <Grid
+                                        item
+                                        container
+                                        direction="column"
+                                        spacing={3}
+                                        sx={{
+                                            justifyContent: "flex-start",
+                                            alignItems: "flex-start",
+                                        }}
+                                    >
+                                        <Grid item>
+                                            <Typography variant="h3">
+                                                {post.titlePL}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1">
+                                                {dayjs(
+                                                    convertFirebaseTimestamp(
+                                                        post.date
+                                                    )
+                                                ).format("DD/MM/YYYY")}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid
+                                            item
+                                            xs={12}
+                                            sx={{ width: "100%" }}
+                                        >
+                                            <Image
+                                                className={styles.postImage}
+                                                src={post.mainFile}
+                                                alt="Example image"
+                                                fill
+                                                priority
+                                            />
+                                        </Grid>
+                                        <Grid
+                                            item
+                                            container
+                                            direction="row"
+                                            spacing={2}
+                                        >
+                                            <Grid item xs={6}>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="error"
+                                                    fullWidth
+                                                    onClick={() =>
+                                                        setIsEditing(true)
+                                                    }
+                                                >
+                                                    Edytuj
+                                                </Button>
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                {" "}
+                                                <Button
+                                                    variant="contained"
+                                                    color="error"
+                                                    fullWidth
+                                                    onClick={() => deletePost()}
+                                                >
+                                                    Usuń
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    {post.descriptionPL && (
+                                        <Grid item container>
+                                            <div
+                                                dangerouslySetInnerHTML={{
+                                                    __html: convertDraftToHtmlWithEmptyBlocks(
+                                                        post.descriptionPL
+                                                    ),
+                                                }}
+                                            />
+                                        </Grid>
+                                    )}
+                                    {post.images.length > 0 && (
+                                        <Grid
+                                            item
+                                            xs={12}
+                                            className={styles.galleryContainer}
+                                        >
+                                            <ImageGallery
+                                                items={convertImagesToGallery(
+                                                    post.images as string[]
+                                                )}
+                                                showFullscreenButton={true}
+                                                startIndex={1}
+                                            />
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            ) : (
+                                <PostFormControl
+                                    mode={OPERATION_MODE.Edit}
+                                    closeFormControl={setIsEditing}
+                                />
+                            )}
+                        </>
+                    ) : (
+                        <Loader />
+                    )}
+                </Paper>
+            </Paper>
+        </Grid>
+    );
+};
+
+export default Post;

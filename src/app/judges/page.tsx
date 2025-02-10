@@ -24,13 +24,13 @@ const page = () => {
                     xs={12}
                 >
                     <Grid item xs={12} sx={{ textAlign: "center" }}>
-                        <Typography variant="h3">Regulamin</Typography>
+                        <Typography variant="h3">Judges</Typography>
                     </Grid>
                     <Grid item xs={12} sm={8}>
                         <TextEditorComponent
-                            collectionName="rules"
-                            collectionId="Jln6vLueJh7byiux8FsW"
-                        />
+                            collectionName="judges"
+                            collectionId="5MhxZbiqHBODQRnlE63j"
+                        />{" "}
                     </Grid>
                 </Grid>
             </Paper>

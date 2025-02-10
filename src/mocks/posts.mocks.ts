@@ -1,6 +1,6 @@
-import { Post } from "@/types/post.type";
+import { PostT } from "@/types/post.type";
 
-export const mockedPosts: Post[] = [
+export const mockedPosts: PostT[] = [
     {
         id: "1",
         titlePL: "FIRST POST",
