@@ -65,6 +65,11 @@ const navLinks: NavLinkParams[] = [
         url: "/gallery",
     },
     {
+        name: "Judges",
+        isReflink: false,
+        url: "/judges",
+    },
+    {
         name: "Clubs",
         isReflink: true,
         url: "/",
