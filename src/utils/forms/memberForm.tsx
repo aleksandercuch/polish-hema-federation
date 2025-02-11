@@ -87,7 +87,7 @@ export const MemberForm = (props: IProps) => {
 
     const submitForm = async (data: memberParams) => {
         props.setLoading(true);
-        const sectionMembers = props.section.members;
+        const sectionMembers = props.section.members as memberParams[];
         try {
             let downloadURL = "";
 

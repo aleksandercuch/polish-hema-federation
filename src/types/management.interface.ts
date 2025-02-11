@@ -20,7 +20,7 @@ export interface requestSectionParams {
     name: string;
     descriptionEng?: any;
     descriptionPl?: any;
-    members: memberParams[];
+    members: memberParams[] | string[];
 }
 export interface sectionParams extends requestSectionParams {
     id: string;
