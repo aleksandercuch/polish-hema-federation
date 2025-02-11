@@ -18,6 +18,8 @@ export interface contactParams {
 
 export interface requestSectionParams {
     name: string;
+    descriptionEng?: any;
+    descriptionPl?: any;
     members: memberParams[];
 }
 export interface sectionParams extends requestSectionParams {
@@ -36,4 +38,14 @@ export const defaultMember = {
     descriptionPL: "",
     file: "",
     id: -1,
+};
+
+export const defaultContact = {
+    id: "",
+    name: "",
+    descriptionENG: "",
+    descriptionPL: "",
+    file: "",
+    phone: "",
+    email: "",
 };

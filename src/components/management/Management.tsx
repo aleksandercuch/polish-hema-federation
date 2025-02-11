@@ -51,13 +51,8 @@ import {
 import { MemberForm } from "@/utils/forms/memberForm";
 import { fileExists } from "@/utils/storage/fileExistInStorage";
 
-const removeElementAtIndex = (arr: memberParams[], index: number) => {
-    if (index < 0 || index >= arr.length) {
-        console.error("Index out of bounds");
-        return arr;
-    }
-    return arr.slice(0, index).concat(arr.slice(index + 1));
-};
+// UTILS
+import { removeElementAtIndex } from "@/utils/array/deleteWithIndex";
 
 const Management = () => {
     const [sectionsList, setSectionsList] = useState<sectionParams[]>([]);

@@ -1,10 +1,11 @@
 "use client";
-
-import { SubPageBanner } from "@/components/banner/SubPageBanner";
-// COMPONENTS
-import Contact from "@/components/contact/Contact";
 import { Grid, Paper, Typography } from "@mui/material";
+
+// COMPONENTS
+import { SubPageBanner } from "@/components/banner/SubPageBanner";
 import styles from "@/app/subpage.module.css";
+import TextEditorComponent from "@/components/SingePageText/TextEditor";
+import Contact from "@/components/contact/Contact";
 
 const page = () => {
     return (
@@ -24,12 +25,18 @@ const page = () => {
                     xs={12}
                 >
                     <Grid item xs={12} sx={{ textAlign: "center" }}>
-                        <Typography variant="h3">Kontakt</Typography>
+                        <Typography variant="h3">Cooperation</Typography>
                     </Grid>
                     <Contact
-                        storageHref="contactImages"
-                        collectionName="contact"
+                        storageHref="cooperationImages"
+                        collectionName="cooperationContact"
                     />
+                    <Grid item xs={12} sm={8}>
+                        <TextEditorComponent
+                            collectionName="cooperation"
+                            collectionId="MgjzyLQzaSOhPxrF6hjd"
+                        />{" "}
+                    </Grid>
                 </Grid>
             </Paper>
         </Grid>
