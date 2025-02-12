@@ -1,6 +1,9 @@
 import { memberParams } from "@/types/management.interface";
 
-export const removeElementAtIndex = (arr: memberParams[], index: number) => {
+export const removeElementAtIndex = (
+    arr: memberParams[] | string[],
+    index: number
+) => {
     if (index < 0 || index >= arr.length) {
         console.error("Index out of bounds");
         return arr;

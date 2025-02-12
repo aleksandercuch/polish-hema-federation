@@ -30,7 +30,7 @@ import { OPERATION_MODE } from "../constants/operationModeEnum";
 export interface sectionParams {
     id: string;
     name: string;
-    members: memberParams[];
+    members: memberParams[] | string[];
 }
 
 interface IProps {
@@ -39,12 +39,14 @@ interface IProps {
     section?: sectionParams;
     loading: boolean;
     setLoading: Dispatch<SetStateAction<boolean>>;
+    collection: string;
 }
 
 const CreateSectionForm = (props: IProps) => {
     const form = useForm<sectionParams>({
         defaultValues: {
             name: props.section ? props.section.name : "",
+            members: props.section ? props.section.members : [],
         },
     });
 
@@ -59,7 +61,7 @@ const CreateSectionForm = (props: IProps) => {
         props.setLoading(true);
         if (props.section && props.section.id) {
             // EDITION
-            updateDoc(doc(db, "management", props.section.id), {
+            updateDoc(doc(db, props.collection, props.section.id), {
                 name: data.name,
                 members: props.section.members,
             })
@@ -73,7 +75,7 @@ const CreateSectionForm = (props: IProps) => {
                 });
         } else {
             //ADDING
-            addDoc(collection(db, "management"), {
+            addDoc(collection(db, props.collection), {
                 name: data.name,
                 members: [],
             }).then(() => {

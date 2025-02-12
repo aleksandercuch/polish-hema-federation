@@ -49,16 +49,12 @@ import { defaultPostValues } from "@/utils/post/postDefaultValues";
 import { Loader } from "../loader/loader";
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 import { addRandomSuffix } from "@/utils/post/addRandomSuffix";
+import { arraysEqual } from "@/utils/array/arrayIsEqual";
 
 interface IProps {
     closeFormControl: Dispatch<SetStateAction<boolean>>;
     mode: OPERATION_MODE;
 }
-
-const arraysEqual = (arr1: string[], arr2: string[]): boolean => {
-    if (arr1.length !== arr2.length) return false;
-    return arr1.every((value, index) => value === arr2[index]);
-};
 
 const PostFormControl = (props: IProps) => {
     const [loading, setLoading] = useState(true);

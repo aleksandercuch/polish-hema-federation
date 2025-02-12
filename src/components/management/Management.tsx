@@ -53,6 +53,7 @@ import { fileExists } from "@/utils/storage/fileExistInStorage";
 
 // UTILS
 import { removeElementAtIndex } from "@/utils/array/deleteWithIndex";
+import { isMemberParams } from "@/types/typeGuards/isMemberParams";
 
 const Management = () => {
     const [sectionsList, setSectionsList] = useState<sectionParams[]>([]);
@@ -83,7 +84,7 @@ const Management = () => {
 
             // Update document
             const updatedMembers = removeElementAtIndex(
-                section.members,
+                section.members as memberParams[],
                 member.id
             );
             // Updating an existing member
@@ -126,11 +127,13 @@ const Management = () => {
             // Delete images if they exist
             if (section.members && section.members.length > 0) {
                 await Promise.all(
-                    section.members.map(async (member) => {
-                        if (await fileExists(member.file)) {
-                            await deleteObject(ref(storage, member.file));
-                        }
-                    })
+                    section.members
+                        .filter(isMemberParams) // Ensure only valid members are processed
+                        .map(async (member) => {
+                            if (await fileExists(member.file)) {
+                                await deleteObject(ref(storage, member.file));
+                            }
+                        })
                 );
             }
 
@@ -310,114 +313,131 @@ const Management = () => {
                                                     </Button>
                                                 </Grid>
                                             </Grid>
-                                            {section.members.map((member) => (
-                                                <Grid
-                                                    item
-                                                    key={member.id}
-                                                    container
-                                                    xs={12}
-                                                    md={6}
-                                                    sx={{
-                                                        paddingBottom: "40px",
-                                                        textAlign: {
-                                                            xs: "center",
-                                                            sm: "left",
-                                                        },
-                                                    }}
-                                                    spacing={2}
-                                                >
-                                                    <Grid item xs={12} lg={4}>
-                                                        <Avatar
-                                                            alt="Remy Sharp"
-                                                            src={
-                                                                member.file ||
-                                                                DEFAULT_AVATAR
-                                                            }
+                                            {section.members &&
+                                                Array.isArray(
+                                                    section.members
+                                                ) &&
+                                                section.members
+                                                    .filter(isMemberParams) // Ensure only valid members are processed
+                                                    .map((member) => (
+                                                        <Grid
+                                                            item
+                                                            key={member.id}
+                                                            container
+                                                            xs={12}
+                                                            md={6}
                                                             sx={{
-                                                                width: 156,
-                                                                height: 156,
-                                                                margin: "auto",
+                                                                paddingBottom:
+                                                                    "40px",
+                                                                textAlign: {
+                                                                    xs: "center",
+                                                                    sm: "left",
+                                                                },
                                                             }}
-                                                        />
-                                                    </Grid>
-                                                    <Grid
-                                                        item
-                                                        container
-                                                        xs={12}
-                                                        lg={8}
-                                                        spacing={2}
-                                                    >
-                                                        <Grid item xs={12}>
-                                                            <Typography
-                                                                variant="h5"
-                                                                component="h4"
+                                                            spacing={2}
+                                                        >
+                                                            <Grid
+                                                                item
+                                                                xs={12}
+                                                                lg={4}
                                                             >
-                                                                {member.name}
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item>
-                                                            <Typography variant="body1">
-                                                                {
-                                                                    member.descriptionPL
-                                                                }
-                                                            </Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                    <Grid
-                                                        item
-                                                        container
-                                                        xs={12}
-                                                        sx={{
-                                                            justifyContent:
-                                                                "center",
-                                                        }}
-                                                        spacing={2}
-                                                    >
-                                                        {" "}
-                                                        <Grid item>
-                                                            <Button
-                                                                type="submit"
-                                                                color="error"
-                                                                variant="outlined"
-                                                                size="small"
+                                                                <Avatar
+                                                                    alt="Remy Sharp"
+                                                                    src={
+                                                                        member.file ||
+                                                                        DEFAULT_AVATAR
+                                                                    }
+                                                                    sx={{
+                                                                        width: 156,
+                                                                        height: 156,
+                                                                        margin: "auto",
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                            <Grid
+                                                                item
+                                                                container
+                                                                xs={12}
+                                                                lg={8}
+                                                                spacing={2}
+                                                            >
+                                                                <Grid
+                                                                    item
+                                                                    xs={12}
+                                                                >
+                                                                    <Typography
+                                                                        variant="h5"
+                                                                        component="h4"
+                                                                    >
+                                                                        {
+                                                                            member.name
+                                                                        }
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <Typography variant="body1">
+                                                                        {
+                                                                            member.descriptionPL
+                                                                        }
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                            <Grid
+                                                                item
+                                                                container
+                                                                xs={12}
                                                                 sx={{
-                                                                    mb: 2,
-                                                                    mt: 2,
+                                                                    justifyContent:
+                                                                        "center",
                                                                 }}
-                                                                onClick={() =>
-                                                                    handleEditMember(
-                                                                        section,
-                                                                        member
-                                                                    )
-                                                                }
+                                                                spacing={2}
                                                             >
-                                                                Edytuj{" "}
-                                                                {member.name}
-                                                            </Button>
+                                                                <Grid item>
+                                                                    <Button
+                                                                        type="submit"
+                                                                        color="error"
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        sx={{
+                                                                            mb: 2,
+                                                                            mt: 2,
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handleEditMember(
+                                                                                section,
+                                                                                member
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Edytuj{" "}
+                                                                        {
+                                                                            member.name
+                                                                        }
+                                                                    </Button>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <Button
+                                                                        type="submit"
+                                                                        color="error"
+                                                                        variant="contained"
+                                                                        size="small"
+                                                                        sx={{
+                                                                            mb: 2,
+                                                                            mt: 2,
+                                                                        }}
+                                                                        onClick={() =>
+                                                                            handleDeleteMember(
+                                                                                section,
+                                                                                member
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Usuń
+                                                                    </Button>
+                                                                </Grid>
+                                                            </Grid>
                                                         </Grid>
-                                                        <Grid item>
-                                                            <Button
-                                                                type="submit"
-                                                                color="error"
-                                                                variant="contained"
-                                                                size="small"
-                                                                sx={{
-                                                                    mb: 2,
-                                                                    mt: 2,
-                                                                }}
-                                                                onClick={() =>
-                                                                    handleDeleteMember(
-                                                                        section,
-                                                                        member
-                                                                    )
-                                                                }
-                                                            >
-                                                                Usuń
-                                                            </Button>
-                                                        </Grid>
-                                                    </Grid>
-                                                </Grid>
-                                            ))}
+                                                    ))}
                                         </Grid>
                                     ))}
                                     <Grid
@@ -469,6 +489,9 @@ const Management = () => {
                                                         setOpen={setMode}
                                                         loading={loading}
                                                         setLoading={setLoading}
+                                                        collection={
+                                                            "management"
+                                                        }
                                                     />
                                                 </>
                                             )}
@@ -496,7 +519,6 @@ const Management = () => {
                                             ) : (
                                                 // EDIT SECTION NAME
                                                 <>
-                                                    {memberToEdition.id}
                                                     <CreateSectionForm
                                                         mode={
                                                             OPERATION_MODE.Edit
@@ -506,6 +528,9 @@ const Management = () => {
                                                         }
                                                         setOpen={setMode}
                                                         loading={loading}
+                                                        collection={
+                                                            "management"
+                                                        }
                                                         setLoading={setLoading}
                                                     />
                                                 </>
