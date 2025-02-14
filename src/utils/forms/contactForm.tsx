@@ -14,9 +14,6 @@ import {
     Typography,
     TextField,
 } from "@mui/material";
-import styles from "@/app/subpage.module.css";
-import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
-import EmailIcon from "@mui/icons-material/Email";
 import { MuiFileInput } from "mui-file-input";
 
 //FIREBASE
@@ -77,7 +74,7 @@ const ContactForm = (props: IProps) => {
         handleSubmit,
         reset,
         setValue,
-        formState: { isSubmitting, errors, isValid, isSubmitted },
+        formState: { isSubmitting, errors },
     } = form;
 
     const submitForm = async (data: contactParams) => {
@@ -110,22 +107,6 @@ const ContactForm = (props: IProps) => {
                     });
                 }
             }
-            console.log("add", {
-                descriptionPL: data.descriptionPL,
-                descriptionENG: data.descriptionENG,
-                name: data.name,
-                phone: data.phone,
-                email: data.email,
-                file: downloadURL,
-            });
-            console.log("update", {
-                descriptionPL: data.descriptionPL,
-                descriptionENG: data.descriptionENG,
-                name: data.name,
-                phone: data.phone,
-                email: data.email,
-                file: downloadURL || props.contact.file,
-            });
             if (props.contact.id != "") {
                 // Updating an existing contact
                 await updateDoc(

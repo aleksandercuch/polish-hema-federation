@@ -4,15 +4,8 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "@/app/subpage.module.css";
-import Link from "next/link";
-import dayjs from "dayjs";
 import { Controller, useForm } from "react-hook-form";
-import {
-    EditorState,
-    RawDraftContentState,
-    convertFromRaw,
-    convertToRaw,
-} from "draft-js";
+import { EditorState, convertFromRaw, convertToRaw } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
 // CONTEXT
@@ -76,7 +69,7 @@ const PostFormControl = (props: IProps) => {
         control,
         handleSubmit,
         reset,
-        formState: { isSubmitting, errors, isValid, isSubmitted },
+        formState: { isSubmitting, errors },
     } = form;
 
     const submitForm = async (data: PostT) => {
@@ -85,15 +78,13 @@ const PostFormControl = (props: IProps) => {
         try {
             const postRef = post.id ? doc(db, "posts", post.id) : null;
             const isEditMode = props.mode === OPERATION_MODE.Edit;
-            let mainFileUrl = post.mainFile; // Default to existing main file
+            let mainFileUrl = post.mainFile;
 
-            // Handle Main File Upload
             mainFileUrl = await handleMainFileUpload(
                 data.mainFile,
                 mainFileUrl
             );
 
-            // Handle Images Upload
             const updatedImages = !arraysEqual(
                 data.images as string[],
                 post.images as string[]
@@ -127,16 +118,12 @@ const PostFormControl = (props: IProps) => {
         }
     };
 
-    /**
-     * Handles the upload of the main file and returns its URL.
-     */
     const handleMainFileUpload = async (
         newMainFile: File | string | null,
         existingMainFileUrl: string
     ): Promise<string> => {
         if (!newMainFile) return existingMainFileUrl;
 
-        // If a new file is uploaded
         if (newMainFile instanceof File) {
             const mainFileRef = ref(
                 storage,
@@ -144,7 +131,6 @@ const PostFormControl = (props: IProps) => {
             );
             await uploadBytes(mainFileRef, newMainFile);
 
-            // Delete old file if it exists
             if (existingMainFileUrl) {
                 await deleteObject(ref(storage, existingMainFileUrl)).catch(
                     (error) =>
@@ -154,7 +140,6 @@ const PostFormControl = (props: IProps) => {
             return await getDownloadURL(mainFileRef);
         }
 
-        // If a valid URL is provided, return it
         if (typeof newMainFile === "string" && newMainFile.trim() !== "") {
             return newMainFile;
         }
@@ -162,9 +147,6 @@ const PostFormControl = (props: IProps) => {
         return existingMainFileUrl;
     };
 
-    /**
-     * Handles the upload of new images, keeps existing ones, and deletes removed images.
-     */
     const handleImageUploads = async (
         newImages: (File | string)[]
     ): Promise<string[]> => {
@@ -176,12 +158,10 @@ const PostFormControl = (props: IProps) => {
             (file) => typeof file === "string"
         ) as string[];
 
-        // Identify deleted images
         const deletedImages = oldImages.filter(
             (url) => !keptUrls.includes(url as string)
         );
 
-        // Upload new images
         const uploadPromises = newFiles.map(async (file) => {
             const storageRef = ref(
                 storage,
@@ -192,7 +172,6 @@ const PostFormControl = (props: IProps) => {
         });
         const newImageUrls = await Promise.all(uploadPromises);
 
-        // Delete removed images
         await Promise.all(
             deletedImages.map(async (imageUrl) => {
                 const imageRef = ref(storage, imageUrl as string);
@@ -224,10 +203,6 @@ const PostFormControl = (props: IProps) => {
         }
     }, []);
 
-    useEffect(() => {
-        console.log(mainFile);
-    }, [mainFile]);
-
     return (
         <>
             {loading ? (
@@ -243,7 +218,7 @@ const PostFormControl = (props: IProps) => {
                                 mainFile.length > 0 &&
                                 mainFile[0] instanceof File
                                     ? URL.createObjectURL(mainFile[0])
-                                    : post.mainFile // Use URL if no valid File
+                                    : post.mainFile
                             }
                             alt="Example image"
                             fill
@@ -261,8 +236,8 @@ const PostFormControl = (props: IProps) => {
                                 sx={{ mb: 3 }}
                                 {...field}
                                 onChange={(file) => {
-                                    setMainFile([file] as File[]); // Update state
-                                    field.onChange(file); // Pass the files to react-hook-form
+                                    setMainFile([file] as File[]);
+                                    field.onChange(file);
                                 }}
                             />
                         )}
@@ -305,9 +280,6 @@ const PostFormControl = (props: IProps) => {
                                 size="small"
                                 type="text"
                                 error={Boolean(errors[field.name])}
-                                // helperText={
-                                //     errors[field.name]?.message
-                                // }
                                 fullWidth
                                 sx={{ mb: 3 }}
                                 {...field}
@@ -325,12 +297,12 @@ const PostFormControl = (props: IProps) => {
                                 wrapperClassName="wrapperClassName"
                                 editorClassName="editorClassName"
                                 onEditorStateChange={(newEditorState) => {
-                                    setEditorStatePL(newEditorState); // Update local state
+                                    setEditorStatePL(newEditorState);
                                     field.onChange(
                                         convertToRaw(
                                             newEditorState.getCurrentContent()
                                         )
-                                    ); // Sync with react-hook-form
+                                    );
                                 }}
                             />
                         )}
@@ -393,12 +365,12 @@ const PostFormControl = (props: IProps) => {
                                 wrapperClassName="wrapperClassName"
                                 editorClassName="editorClassName"
                                 onEditorStateChange={(newEditorState) => {
-                                    setEditorStateENG(newEditorState); // Update local state
+                                    setEditorStateENG(newEditorState);
                                     field.onChange(
                                         convertToRaw(
                                             newEditorState.getCurrentContent()
                                         )
-                                    ); // Sync with react-hook-form
+                                    );
                                 }}
                             />
                         )}
@@ -415,8 +387,8 @@ const PostFormControl = (props: IProps) => {
                                 sx={{ mb: 3 }}
                                 value={uploadedFiles}
                                 onChange={(files) => {
-                                    setUploadedFiles(files as File[]); // Update state
-                                    field.onChange(files); // Pass the files to react-hook-form
+                                    setUploadedFiles(files as File[]);
+                                    field.onChange(files);
                                 }}
                             />
                         )}
@@ -446,7 +418,7 @@ const PostFormControl = (props: IProps) => {
                                         uploadedFiles.length > 0 &&
                                         file instanceof File
                                             ? URL.createObjectURL(file)
-                                            : (file as string) // Use URL if no valid File
+                                            : (file as string)
                                     }
                                     alt={`Uploaded Preview ${index + 1}`}
                                     layout="fill"

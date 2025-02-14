@@ -1,0 +1,13 @@
+{
+    "Navbar": {
+        "news": "news",
+        "schedule": "schedule",
+        "rules": "rules",
+        "management": "management",
+        "contact": "contact",
+        "gallery": "gallery",
+        "judges": "judges",
+        "cooperation": "cooperation",
+        "clubs": "clubs"
+    }
+}

@@ -2,7 +2,6 @@
 "use client";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-//import { UserAuth } from "@/context/auth-context";
 
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
@@ -14,14 +13,9 @@ import {
     TextField,
 } from "@mui/material";
 
-// @ts-ignore
-
 //FIREBASE
 import { db } from "../../../firebase/config/clientApp";
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-
-// COMPONENTS
-import { Loader } from "@/components/loader/loader";
 
 // TYPES
 import { memberParams } from "@/types/management.interface";
@@ -54,7 +48,7 @@ const CreateSectionForm = (props: IProps) => {
         control,
         handleSubmit,
         reset,
-        formState: { isSubmitting, errors, isValid, isSubmitted },
+        formState: { isSubmitting, errors },
     } = form;
 
     const submitForm = (data: sectionParams) => {

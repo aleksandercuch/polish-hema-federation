@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 //TYPES
-import { Post } from "@/types/post.type";
+import { PostT } from "@/types/post.type";
 
 // MOCKS
 import { mockedPosts } from "@/mocks/posts.mocks";
@@ -21,35 +21,59 @@ import {
     CardMedia,
     CardContent,
     Card,
+    useTheme,
+    useMediaQuery,
 } from "@mui/material";
 
 // CONTEXT
 import { usePost } from "@/contexts/PostsContext";
+import {
+    query,
+    collection,
+    orderBy,
+    limit,
+    startAfter,
+    getDocs,
+} from "firebase/firestore";
+import { db } from "../../../firebase/config/clientApp";
 
 export const NewsHome = () => {
     const [loading, setLoading] = useState(true);
-    const [posts, setPosts] = useState<Post[]>([]);
+    const [posts, setPosts] = useState<PostT[]>([]);
     const { post, setPost } = usePost();
     const router = useRouter();
-
+    const theme = useTheme();
     const isReversedPost = (index: number) => {
         return index == 2 || index == 3 ? true : false;
     };
-
-    const handleNavigation = (post: Post) => {
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+    const handleNavigation = (post: PostT) => {
         setPost(post);
         router.push(`/posts/${post.id}`);
     };
     const fetchPosts = async () => {
         setLoading(true);
+
         try {
-            // MOCKS
-            const response = await mockedPosts;
-            setPosts(response);
-            setLoading(false);
+            let q = query(
+                collection(db, "posts"),
+                orderBy("date", "desc"),
+                limit(6)
+            );
+
+            const snapshot = await getDocs(q);
+
+            const newPosts = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })) as PostT[];
+
+            setPosts(newPosts);
         } catch (error) {
-            console.log(error);
+            console.error("Error fetching posts:", error);
         }
+
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -62,15 +86,36 @@ export const NewsHome = () => {
             direction="row"
             className={styles.news}
             justifyContent={"center"}
+            sx={{
+                maxHeight: { md: "100vh", xs: "none" },
+                marginTop: { md: "100vh", xs: "35vh" },
+            }}
         >
             {posts.map((post, index) => (
-                <Grid item xs={12} md={6} key={post.id}>
+                <Grid
+                    item
+                    xs={12}
+                    md={
+                        posts.length != 6 &&
+                        posts.length % 2 != 0 &&
+                        index == posts.length - 1
+                            ? 12
+                            : 6
+                    }
+                    sx={{
+                        maxHeight: posts.length == 5 ? "240px" : "undefined",
+                    }}
+                    key={post.id}
+                >
                     <Card
                         sx={{
-                            display: "flex",
-                            flexDirection: isReversedPost(index)
-                                ? "row-reverse"
-                                : "row",
+                            display: { sm: "flex", xs: "block" },
+                            flexDirection: {
+                                md: isReversedPost(index)
+                                    ? "row-reverse"
+                                    : "row",
+                                xs: index % 2 == 0 ? "row" : "row-reverse",
+                            },
                             flex: "50% 50%",
                             textAlign: "center",
                             height: "100%",
@@ -78,14 +123,15 @@ export const NewsHome = () => {
                     >
                         <Box
                             sx={{
-                                width: "50%",
+                                width: { sm: "50%", xs: "100%" },
                                 alignContent: "center",
-                                backgroundColor: isReversedPost(index)
-                                    ? "red"
-                                    : "white",
+                                backgroundColor: {
+                                    md: isReversedPost(index) ? "red" : "white",
+                                    xs: index % 2 == 0 ? "white" : "red",
+                                },
                             }}
                         >
-                            <CardContent>
+                            <CardContent sx={{ margin: "10px" }}>
                                 <Grid
                                     container
                                     direction="column"
@@ -97,9 +143,13 @@ export const NewsHome = () => {
                                             component="div"
                                             variant="h5"
                                             color={
-                                                isReversedPost(index)
-                                                    ? "inherit"
-                                                    : "error"
+                                                !isSmallScreen
+                                                    ? isReversedPost(index)
+                                                        ? "inherit"
+                                                        : "error"
+                                                    : index % 2 == 0
+                                                    ? "error"
+                                                    : "inherit"
                                             }
                                         >
                                             {post.titlePL}
@@ -128,9 +178,13 @@ export const NewsHome = () => {
                                             <Button
                                                 variant="outlined"
                                                 color={
-                                                    isReversedPost(index)
-                                                        ? "inherit"
-                                                        : "error"
+                                                    !isSmallScreen
+                                                        ? isReversedPost(index)
+                                                            ? "inherit"
+                                                            : "error"
+                                                        : index % 2 == 0
+                                                        ? "error"
+                                                        : "inherit"
                                                 }
                                                 onClick={() =>
                                                     handleNavigation(post)
@@ -148,7 +202,8 @@ export const NewsHome = () => {
                             image={post.mainFile}
                             alt="Post picture error"
                             sx={{
-                                width: "50%",
+                                width: { sm: "50%", xs: "100%" },
+                                margin: "10px",
                             }}
                         />
                     </Card>
@@ -157,7 +212,8 @@ export const NewsHome = () => {
             <Link href={"/posts"}>
                 <Button
                     className={styles.postsButton}
-                    variant="outlined"
+                    variant="contained"
+                    color="error"
                     fullWidth
                 >
                     Wszystkie posty

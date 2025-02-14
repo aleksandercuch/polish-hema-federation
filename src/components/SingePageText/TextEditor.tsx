@@ -3,19 +3,17 @@
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { convertFromRaw, EditorState, convertToRaw } from "draft-js";
-//import { UserAuth } from "@/context/auth-context";
 
-// ASSETES
+// CONTEXT
+import { UserAuth } from "@/contexts/AuthContext";
+
+// ASSTES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Button, FormControl, Grid, Paper, Typography } from "@mui/material";
-// @ts-ignore
 
 //FIREBASE
 import { db } from "../../../firebase/config/clientApp";
 import { collection, doc, getDoc, updateDoc } from "firebase/firestore";
-
-// COMPONENTS
-import { SubPageBanner } from "@/components/banner/SubPageBanner";
 
 // UTILS
 import { Editor } from "@/utils/editor/editorImport";
@@ -39,8 +37,8 @@ const TextEditorComponent = (props: pageParams) => {
         EditorState.createEmpty()
     );
     const [elements, setElements] = useState<editorParams | null>();
-
     const [isEditing, setIsEditing] = useState(false);
+    const currentUser = UserAuth();
 
     const form = useForm<editorParams>({
         defaultValues: {
@@ -49,23 +47,10 @@ const TextEditorComponent = (props: pageParams) => {
         },
     });
 
-    const onEditorStatePLChange = function (editorState: EditorState) {
-        setEditorStatePL(editorState);
-        const { blocks } = convertToRaw(editorState.getCurrentContent());
-
-        let text = editorState.getCurrentContent().getPlainText("\u0001");
-    };
-    const onEditorStateENGChange = function (editorState: EditorState) {
-        setEditorStateENG(editorState);
-        const { blocks } = convertToRaw(editorState.getCurrentContent());
-
-        let text = editorState.getCurrentContent().getPlainText("\u0001");
-    };
-
     const {
         control,
         handleSubmit,
-        formState: { isSubmitting, errors, isValid, isSubmitted },
+        formState: { isSubmitting },
     } = form;
 
     const submitForm = (data: editorParams) => {
@@ -128,98 +113,112 @@ const TextEditorComponent = (props: pageParams) => {
     }, []);
     return (
         <>
-            {!isEditing ? (
-                <Button
-                    fullWidth
-                    type="submit"
-                    variant="contained"
-                    size="small"
-                    sx={{ mb: 2 }}
-                    onClick={() => setIsEditing(true)}
-                >
-                    Edytuj
-                </Button>
-            ) : (
-                <FormControl
-                    component={"form"}
-                    onSubmit={handleSubmit(submitForm)}
-                    disabled={isSubmitting}
-                >
-                    <Typography variant="h4">Polska wersja</Typography>
-                    <Controller
-                        name="descriptionPL"
-                        control={control}
-                        rules={{ required: "Wypełnij!" }}
-                        render={({ field }) => (
-                            <Editor
-                                editorState={editorStatePL}
-                                toolbarClassName="toolbarClassName"
-                                wrapperClassName="wrapperClassName"
-                                editorClassName="editorClassName"
-                                onEditorStateChange={(newEditorState) => {
-                                    setEditorStatePL(newEditorState); // Update local state
-                                    field.onChange(
-                                        convertToRaw(
-                                            newEditorState.getCurrentContent()
-                                        )
-                                    ); // Sync with react-hook-form
-                                }}
+            {currentUser?.user?.email && (
+                <>
+                    {!isEditing ? (
+                        <Button
+                            fullWidth
+                            type="submit"
+                            variant="contained"
+                            size="small"
+                            sx={{ mb: 2 }}
+                            onClick={() => setIsEditing(true)}
+                        >
+                            Edytuj
+                        </Button>
+                    ) : (
+                        <FormControl
+                            component={"form"}
+                            onSubmit={handleSubmit(submitForm)}
+                            disabled={isSubmitting}
+                        >
+                            <Typography variant="h4">Polska wersja</Typography>
+                            <Controller
+                                name="descriptionPL"
+                                control={control}
+                                rules={{ required: "Wypełnij!" }}
+                                render={({ field }) => (
+                                    <Editor
+                                        editorState={editorStatePL}
+                                        toolbarClassName="toolbarClassName"
+                                        wrapperClassName="wrapperClassName"
+                                        editorClassName="editorClassName"
+                                        onEditorStateChange={(
+                                            newEditorState
+                                        ) => {
+                                            setEditorStatePL(newEditorState); // Update local state
+                                            field.onChange(
+                                                convertToRaw(
+                                                    newEditorState.getCurrentContent()
+                                                )
+                                            ); // Sync with react-hook-form
+                                        }}
+                                    />
+                                )}
                             />
-                        )}
-                    />
-                    <Typography variant="h4" sx={{ mt: 3 }}>
-                        Angielska wersja
-                    </Typography>
-                    <Controller
-                        name="descriptionENG"
-                        control={control}
-                        rules={{ required: "Wypełnij!" }}
-                        render={({ field }) => (
-                            <Editor
-                                editorState={editorStateENG}
-                                toolbarClassName="toolbarClassName"
-                                wrapperClassName="wrapperClassName"
-                                editorClassName="editorClassName"
-                                onEditorStateChange={(newEditorState) => {
-                                    setEditorStateENG(newEditorState); // Update local state
-                                    field.onChange(
-                                        convertToRaw(
-                                            newEditorState.getCurrentContent()
-                                        )
-                                    ); // Sync with react-hook-form
-                                }}
+                            <Typography variant="h4" sx={{ mt: 3 }}>
+                                Angielska wersja
+                            </Typography>
+                            <Controller
+                                name="descriptionENG"
+                                control={control}
+                                rules={{ required: "Wypełnij!" }}
+                                render={({ field }) => (
+                                    <Editor
+                                        editorState={editorStateENG}
+                                        toolbarClassName="toolbarClassName"
+                                        wrapperClassName="wrapperClassName"
+                                        editorClassName="editorClassName"
+                                        onEditorStateChange={(
+                                            newEditorState
+                                        ) => {
+                                            setEditorStateENG(newEditorState); // Update local state
+                                            field.onChange(
+                                                convertToRaw(
+                                                    newEditorState.getCurrentContent()
+                                                )
+                                            ); // Sync with react-hook-form
+                                        }}
+                                    />
+                                )}
                             />
-                        )}
-                    />
-                    <Grid container direction="row" spacing={1} sx={{ mt: 5 }}>
-                        <Grid item xs={6}>
-                            <Button
-                                fullWidth
-                                type="submit"
-                                variant="contained"
-                                size="small"
-                                disabled={isSubmitting}
+                            <Grid
+                                container
+                                direction="row"
+                                spacing={1}
+                                sx={{ mt: 5 }}
                             >
-                                Zapisz zmiany
-                            </Button>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Button
-                                fullWidth
-                                type="submit"
-                                variant="contained"
-                                size="small"
-                                color="error"
-                                onClick={() => setIsEditing(false)}
-                            >
-                                Anuluj
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </FormControl>
+                                <Grid item xs={6}>
+                                    <Button
+                                        fullWidth
+                                        type="submit"
+                                        variant="contained"
+                                        size="small"
+                                        disabled={isSubmitting}
+                                    >
+                                        Zapisz zmiany
+                                    </Button>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Button
+                                        fullWidth
+                                        type="submit"
+                                        variant="contained"
+                                        size="small"
+                                        color="error"
+                                        onClick={() => setIsEditing(false)}
+                                    >
+                                        Anuluj
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </FormControl>
+                    )}{" "}
+                </>
             )}
             {elements && !isEditing && (
                 <div
+                    style={{ padding: "0 5px" }}
                     dangerouslySetInnerHTML={{
                         __html: convertDraftToHtmlWithEmptyBlocks(
                             elements.descriptionPL

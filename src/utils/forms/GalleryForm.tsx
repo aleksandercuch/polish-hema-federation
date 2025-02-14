@@ -3,40 +3,31 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
-//import { UserAuth } from "@/context/auth-context";
 
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import {
-    Button,
-    FormControl,
-    Grid,
-    Typography,
-    TextField,
-    Box,
-} from "@mui/material";
+import { Button, FormControl, Grid, Typography, Box } from "@mui/material";
+import { MuiFileInput } from "mui-file-input";
 
 // @ts-ignore
 
 //FIREBASE
 import { db, storage } from "../../../firebase/config/clientApp";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
-
-// COMPONENTS
-import { Loader } from "@/components/loader/loader";
-
-// TYPES
-import { memberParams } from "@/types/management.interface";
-import { OPERATION_MODE } from "../constants/operationModeEnum";
-import { MuiFileInput } from "mui-file-input";
-import { arraysEqual } from "../array/arrayIsEqual";
+import { doc, updateDoc } from "firebase/firestore";
 import {
     ref,
     uploadBytes,
     getDownloadURL,
     deleteObject,
 } from "firebase/storage";
+
+// TYPES
+import { memberParams } from "@/types/management.interface";
+
+// UTILS
+import { OPERATION_MODE } from "../constants/operationModeEnum";
 import { addRandomSuffix } from "../post/addRandomSuffix";
+import { arraysEqual } from "../array/arrayIsEqual";
 
 export interface sectionParams {
     id: string;
@@ -70,7 +61,7 @@ const GalleryForm = (props: IProps) => {
         control,
         handleSubmit,
         reset,
-        formState: { isSubmitting, errors, isValid, isSubmitted },
+        formState: { isSubmitting },
     } = form;
 
     const handleImageUploads = async (

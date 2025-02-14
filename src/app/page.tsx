@@ -1,9 +1,11 @@
 "use client";
+
 // COMPONENTS
 import { Banner } from "@/components/banner/Banner";
 import { NewsHome } from "@/components/posts/NewsHome";
 import { Schedule } from "@/components/schedule/Schedule";
 import OpenLayersMap from "@/components/map/Map";
+import Footer from "@/components/footer/Footer";
 
 const Home = () => {
     return (
@@ -18,6 +20,7 @@ const Home = () => {
             <section id="OpenLayersMap">
                 <OpenLayersMap />
             </section>
+            <Footer />
         </div>
     );
 };

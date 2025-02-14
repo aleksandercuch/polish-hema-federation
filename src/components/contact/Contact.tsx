@@ -1,44 +1,20 @@
 // CORE
 "use client";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
 //import { UserAuth } from "@/context/auth-context";
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import {
-    Avatar,
-    Button,
-    FormControl,
-    Grid,
-    Paper,
-    Typography,
-    TextField,
-} from "@mui/material";
-import styles from "@/app/subpage.module.css";
+import { Avatar, Button, Grid, Typography } from "@mui/material";
 import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
 import EmailIcon from "@mui/icons-material/Email";
-import { MuiFileInput } from "mui-file-input";
 
 //FIREBASE
-import {
-    deleteObject,
-    getDownloadURL,
-    ref,
-    uploadBytes,
-} from "firebase/storage";
+import { deleteObject, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
-import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDocs,
-    updateDoc,
-} from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 
 // COMPONENTS
-import { SubPageBanner } from "@/components/banner/SubPageBanner";
-import { addRandomSuffix } from "@/utils/post/addRandomSuffix";
+
 import { DEFAULT_AVATAR } from "@/utils/constants/constants";
 import ContactForm from "@/utils/forms/contactForm";
 
@@ -47,6 +23,8 @@ import { contactParams, defaultContact } from "@/types/management.interface";
 import { fileExists } from "@/utils/storage/fileExistInStorage";
 import { Loader } from "../loader/loader";
 
+//CONTEXT
+import { UserAuth } from "@/contexts/AuthContext";
 interface IProps {
     storageHref: string;
     collectionName: string;
@@ -57,12 +35,12 @@ const Contact = (props: IProps) => {
     const [contactToEdition, setContactToEdition] =
         useState<contactParams>(defaultContact);
     const [loading, setLoading] = useState(true);
-
     const [isEditing, setIsEditing] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
 
+    const currentUser = UserAuth();
+
     const deleteContact = async (data: contactParams) => {
-        // Delete main file if it exists
         if (!data.file) return;
         else {
             const confirmDelete = window.confirm(
@@ -107,9 +85,9 @@ const Contact = (props: IProps) => {
             .then((querySnapshot) => {
                 const dataArray = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
-                    ...doc.data(), // Spread the document data
+                    ...doc.data(),
                 })); // @ts-ignore
-                setContactList(dataArray); // Logs the collection as an array
+                setContactList(dataArray);
             })
             .catch((error) => {
                 console.error("Error retrieving collection: ", error);
@@ -159,8 +137,8 @@ const Contact = (props: IProps) => {
                                             alt="Remy Sharp"
                                             src={element.file || DEFAULT_AVATAR}
                                             sx={{
-                                                width: 156,
-                                                height: 156,
+                                                width: 120,
+                                                height: 120,
                                                 margin: "auto",
                                             }}
                                         />
@@ -171,6 +149,17 @@ const Contact = (props: IProps) => {
                                         xs={12}
                                         lg={8}
                                         spacing={2}
+                                        sx={{
+                                            justifyContent: {
+                                                xs: "center",
+                                                lg: "flex-start",
+                                            },
+
+                                            textAlign: {
+                                                xs: "center",
+                                                lg: "left",
+                                            },
+                                        }}
                                     >
                                         <Grid item xs={12}>
                                             <Typography
@@ -186,92 +175,122 @@ const Contact = (props: IProps) => {
                                             </Typography>
                                         </Grid>
                                         <Grid item container xs={12}>
-                                            <Grid item container xs={6}>
-                                                <Grid item xs={2}>
+                                            <Grid item container xs={12} lg={6}>
+                                                <Grid item xs={1} lg={2}>
                                                     <LocalPhoneIcon />
                                                 </Grid>
-                                                <Grid item xs={10}>
+                                                <Grid item xs={9}>
                                                     <Typography variant="body1">
                                                         {element.phone}
                                                     </Typography>
                                                 </Grid>
+                                                <Grid
+                                                    item
+                                                    xs={1}
+                                                    lg={2}
+                                                    sx={{
+                                                        display: {
+                                                            xs: "inherit",
+                                                            lg: "none",
+                                                        },
+                                                    }}
+                                                >
+                                                    <LocalPhoneIcon />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item container xs={6}>
-                                                <Grid item xs={2}>
+                                            <Grid item container xs={12} lg={6}>
+                                                <Grid item xs={1} lg={2}>
                                                     <EmailIcon />
                                                 </Grid>
-                                                <Grid item xs={10}>
+                                                <Grid item xs={9}>
                                                     <Typography variant="body1">
                                                         {element.email}
                                                     </Typography>
                                                 </Grid>
+                                                <Grid
+                                                    item
+                                                    xs={1}
+                                                    lg={2}
+                                                    sx={{
+                                                        display: {
+                                                            xs: "inherit",
+                                                            lg: "none",
+                                                        },
+                                                    }}
+                                                >
+                                                    <EmailIcon />
+                                                </Grid>
                                             </Grid>
                                         </Grid>
                                     </Grid>
-                                    <Grid
-                                        item
-                                        container
-                                        xs={12}
-                                        sx={{
-                                            justifyContent: "center",
-                                        }}
-                                        spacing={2}
-                                    >
-                                        <Grid item>
-                                            <Button
-                                                type="submit"
-                                                color="error"
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{
-                                                    mb: 2,
-                                                    mt: 2,
-                                                }}
-                                                onClick={() =>
-                                                    editContact(element)
-                                                }
-                                            >
-                                                Edytuj {element.name}
-                                            </Button>
+                                    {currentUser?.user?.email && (
+                                        <Grid
+                                            item
+                                            container
+                                            xs={12}
+                                            sx={{
+                                                justifyContent: "center",
+                                            }}
+                                            spacing={2}
+                                        >
+                                            <Grid item>
+                                                <Button
+                                                    type="submit"
+                                                    color="error"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{
+                                                        mb: 2,
+                                                        mt: 2,
+                                                    }}
+                                                    onClick={() =>
+                                                        editContact(element)
+                                                    }
+                                                >
+                                                    Edytuj {element.name}
+                                                </Button>
+                                            </Grid>
+                                            <Grid item>
+                                                {" "}
+                                                <Button
+                                                    type="submit"
+                                                    color="error"
+                                                    variant="contained"
+                                                    size="small"
+                                                    sx={{
+                                                        mb: 2,
+                                                        mt: 2,
+                                                    }}
+                                                    onClick={() =>
+                                                        deleteContact(element)
+                                                    }
+                                                >
+                                                    Usuń {element.name}
+                                                </Button>
+                                            </Grid>
                                         </Grid>
-                                        <Grid item>
-                                            {" "}
-                                            <Button
-                                                type="submit"
-                                                color="error"
-                                                variant="contained"
-                                                size="small"
-                                                sx={{
-                                                    mb: 2,
-                                                    mt: 2,
-                                                }}
-                                                onClick={() =>
-                                                    deleteContact(element)
-                                                }
-                                            >
-                                                Usuń {element.name}
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
+                                    )}
                                 </Grid>
                             ))}
-                            <Grid
-                                item
-                                container
-                                xs={6}
-                                sx={{ paddingBottom: "40px" }}
-                            >
-                                <Button
-                                    fullWidth
-                                    type="submit"
-                                    variant="contained"
-                                    size="small"
-                                    sx={{ mb: 2 }}
-                                    onClick={() => setIsAdding(true)}
+                            {currentUser?.user?.email && (
+                                <Grid
+                                    item
+                                    container
+                                    xs={6}
+                                    sx={{ paddingBottom: "40px" }}
                                 >
-                                    Dodaj nowy kontakt
-                                </Button>
-                            </Grid>
+                                    <Button
+                                        fullWidth
+                                        type="submit"
+                                        variant="contained"
+                                        size="small"
+                                        sx={{ mb: 2 }}
+                                        onClick={() => setIsAdding(true)}
+                                    >
+                                        Dodaj nowy kontakt
+                                    </Button>
+                                </Grid>
+                            )}
                         </>
                     ) : (
                         <ContactForm
