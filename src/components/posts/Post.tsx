@@ -119,7 +119,7 @@ const Post = () => {
         } finally {
             setLoading(false);
         }
-    }, [id, db, setPost, setLoading]);
+    }, [id, setPost, setLoading]);
 
     useEffect(() => {
         if (!post?.id) {

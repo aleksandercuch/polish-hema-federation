@@ -72,7 +72,7 @@ const Contact = (props: IProps) => {
     };
 
     const closeAdminPanel = () => {
-        contactToEdition.id != "" && setContactToEdition(defaultContact);
+        setContactToEdition(defaultContact);
         setIsAdding(false);
         setIsEditing(false);
     };
@@ -85,7 +85,7 @@ const Contact = (props: IProps) => {
             const dataArray = querySnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
-            })); // @ts-expect-error
+            })); // @ts-expect-error: temporary solution: temporary solution
             setContactList(dataArray);
         } catch (error) {
             console.error("Error retrieving collection: ", error);
