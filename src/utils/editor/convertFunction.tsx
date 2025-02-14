@@ -1,5 +1,5 @@
 import { RawDraftContentState } from "draft-js";
-//@ts-expect-error
+// @ts-expect-error: temporary solution
 import draftToHtml from "draftjs-to-html";
 
 const preprocessRawContentState = (

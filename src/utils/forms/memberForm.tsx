@@ -179,7 +179,7 @@ export const MemberForm = (props: IProps) => {
                 name={"file"}
                 control={control}
                 render={({ field }) => (
-                    // @ts-expect-error
+                    // @ts-expect-error: temporary solution
                     <MuiFileInput
                         inputProps={{
                             accept: ".png, .jpeg, .jpg",

@@ -87,7 +87,7 @@ const ListOfPosts = () => {
                 setLoading(false);
             }
         },
-        [db, lastDoc, setLoading, setPosts, setLastDoc, setHasMore]
+        [lastDoc, setLoading, setPosts, setLastDoc, setHasMore]
     );
 
     const handleNavigation = (post: PostT) => {

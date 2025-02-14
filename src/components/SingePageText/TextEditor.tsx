@@ -26,7 +26,7 @@ import { convertDraftToHtmlWithEmptyBlocks } from "@/utils/editor/convertFunctio
 
 interface editorParams {
     descriptionPL: string | RawDraftContentState;
-    descriptionENG: any;
+    descriptionENG: string | RawDraftContentState;
 }
 
 interface pageParams {
@@ -103,7 +103,7 @@ const TextEditorComponent = (props: pageParams) => {
         );
         setEditorStateENG(
             EditorState.createWithContent(
-                convertFromRaw(elements.descriptionENG)
+                convertFromRaw(elements.descriptionENG as RawDraftContentState)
             )
         );
     }, [elements]);

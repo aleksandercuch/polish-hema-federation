@@ -141,7 +141,7 @@ const Management = () => {
                 const dataArray = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
-                })); //@ts-expect-error
+                })); //@ts-expect-error: temporary solution
                 setSectionsList(dataArray);
             })
             .catch((error) => {
@@ -302,7 +302,7 @@ const Management = () => {
                                                 Array.isArray(
                                                     section.members
                                                 ) &&
-                                                section.members // @ts-expect-error
+                                                section.members //  @ts-expect-error: temporary solution
                                                     .filter(isMemberParams)
                                                     .map((member) => (
                                                         <Grid
