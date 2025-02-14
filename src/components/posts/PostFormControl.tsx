@@ -1,11 +1,22 @@
 "use client";
 
 // CORE
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import {
+    Dispatch,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
 import Image from "next/image";
 import styles from "@/app/subpage.module.css";
 import { Controller, useForm } from "react-hook-form";
-import { EditorState, convertFromRaw, convertToRaw } from "draft-js";
+import {
+    EditorState,
+    RawDraftContentState,
+    convertFromRaw,
+    convertToRaw,
+} from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
 // CONTEXT
@@ -15,7 +26,6 @@ import { usePost } from "@/contexts/PostsContext";
 import {
     Button,
     Grid,
-    Paper,
     Typography,
     FormControl,
     TextField,
@@ -72,84 +82,53 @@ const PostFormControl = (props: IProps) => {
         formState: { isSubmitting, errors },
     } = form;
 
-    const submitForm = async (data: PostT) => {
-        setLoading(true);
-
-        try {
-            const postRef = post.id ? doc(db, "posts", post.id) : null;
-            const isEditMode = props.mode === OPERATION_MODE.Edit;
-            let mainFileUrl = post.mainFile;
-
-            mainFileUrl = await handleMainFileUpload(
-                data.mainFile,
-                mainFileUrl
-            );
-
-            const updatedImages = !arraysEqual(
-                data.images as string[],
-                post.images as string[]
+    const fetchDescriptionsToEditor = useCallback(() => {
+        setEditorStatePL(
+            EditorState.createWithContent(
+                convertFromRaw(post.descriptionPL as RawDraftContentState)
             )
-                ? await handleImageUploads(data.images)
-                : [];
+        );
+        setEditorStateENG(
+            EditorState.createWithContent(
+                convertFromRaw(post.descriptionENG as RawDraftContentState)
+            )
+        );
+    }, [post.descriptionPL, post.descriptionENG]);
 
-            const postData = {
-                titleENG: data.titleENG,
-                titlePL: data.titlePL,
-                introENG: data.introENG,
-                introPL: data.introPL,
-                descriptionENG: data.descriptionENG,
-                descriptionPL: data.descriptionPL,
-                mainFile: mainFileUrl,
-                images: updatedImages.length > 0 ? updatedImages : post.images,
-                date: new Date(),
-            };
+    const handleMainFileUpload = useCallback(
+        async (
+            newMainFile: File | string | null,
+            existingMainFileUrl: string
+        ): Promise<string> => {
+            if (!newMainFile) return existingMainFileUrl;
 
-            if (isEditMode && postRef) {
-                await updateDoc(postRef, postData);
-                alert("Post successfully updated!");
-            } else {
-                await addDoc(collection(db, "posts"), postData);
-                alert("Post successfully added!");
-            }
-        } catch (error) {
-            console.error("Error processing post:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleMainFileUpload = async (
-        newMainFile: File | string | null,
-        existingMainFileUrl: string
-    ): Promise<string> => {
-        if (!newMainFile) return existingMainFileUrl;
-
-        if (newMainFile instanceof File) {
-            const mainFileRef = ref(
-                storage,
-                `posts/${addRandomSuffix(newMainFile.name)}`
-            );
-            await uploadBytes(mainFileRef, newMainFile);
-
-            if (existingMainFileUrl) {
-                await deleteObject(ref(storage, existingMainFileUrl)).catch(
-                    (error) =>
-                        console.error("Error deleting old main file:", error)
+            if (newMainFile instanceof File) {
+                const mainFileRef = ref(
+                    storage,
+                    `posts/${addRandomSuffix(newMainFile.name)}`
                 );
+                await uploadBytes(mainFileRef, newMainFile);
+
+                if (existingMainFileUrl) {
+                    await deleteObject(ref(storage, existingMainFileUrl)).catch(
+                        (error) =>
+                            console.error(
+                                "Error deleting old main file:",
+                                error
+                            )
+                    );
+                }
+                return await getDownloadURL(mainFileRef);
             }
-            return await getDownloadURL(mainFileRef);
-        }
 
-        if (typeof newMainFile === "string" && newMainFile.trim() !== "") {
-            return newMainFile;
-        }
+            return typeof newMainFile === "string" && newMainFile.trim() !== ""
+                ? newMainFile
+                : existingMainFileUrl;
+        },
+        [storage]
+    );
 
-        return existingMainFileUrl;
-    };
-
-    const handleImageUploads = async (
-        newImages: (File | string)[]
-    ): Promise<string[]> => {
+    const handleImageUploads = useCallback(async (): Promise<string[]> => {
         const oldImages = post.images || [];
         const newFiles = uploadedFiles.filter(
             (file) => file instanceof File
@@ -182,26 +161,69 @@ const PostFormControl = (props: IProps) => {
         );
 
         return keptUrls.concat(newImageUrls);
-    };
+    }, [uploadedFiles, post.images, storage]);
 
-    const fetchDescriptionsToEditor = async () => {
-        setEditorStatePL(
-            EditorState.createWithContent(convertFromRaw(post.descriptionPL))
-        );
-        setEditorStateENG(
-            EditorState.createWithContent(convertFromRaw(post.descriptionENG))
-        );
-    };
+    const submitForm = useCallback(
+        async (data: PostT) => {
+            setLoading(true);
+
+            try {
+                const postRef = post.id ? doc(db, "posts", post.id) : null;
+                const isEditMode = props.mode === OPERATION_MODE.Edit;
+                let mainFileUrl = post.mainFile;
+
+                mainFileUrl = await handleMainFileUpload(
+                    data.mainFile,
+                    mainFileUrl as string
+                );
+
+                const updatedImages = !arraysEqual(
+                    data.images as string[],
+                    post.images as string[]
+                )
+                    ? await handleImageUploads()
+                    : [];
+
+                const postData = {
+                    titleENG: data.titleENG,
+                    titlePL: data.titlePL,
+                    introENG: data.introENG,
+                    introPL: data.introPL,
+                    descriptionENG: data.descriptionENG,
+                    descriptionPL: data.descriptionPL,
+                    mainFile: mainFileUrl,
+                    images:
+                        updatedImages.length > 0 ? updatedImages : post.images,
+                    date: new Date(),
+                };
+
+                if (isEditMode && postRef) {
+                    await updateDoc(postRef, postData);
+                    alert("Post successfully updated!");
+                } else {
+                    await addDoc(collection(db, "posts"), postData);
+                    alert("Post successfully added!");
+                }
+            } catch (error) {
+                console.error("Error processing post:", error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [post, handleMainFileUpload, handleImageUploads, setLoading]
+    );
 
     useEffect(() => {
         if (props.mode === OPERATION_MODE.Add) {
-            post.id && setPost(defaultPostValues);
+            if (post.id) {
+                setPost(defaultPostValues);
+            }
             reset();
         }
         if (props.mode === OPERATION_MODE.Edit) {
             fetchDescriptionsToEditor();
         }
-    }, []);
+    }, [props.mode, post.id, setPost, reset, fetchDescriptionsToEditor]);
 
     return (
         <>
@@ -218,7 +240,7 @@ const PostFormControl = (props: IProps) => {
                                 mainFile.length > 0 &&
                                 mainFile[0] instanceof File
                                     ? URL.createObjectURL(mainFile[0])
-                                    : post.mainFile
+                                    : (post.mainFile as string)
                             }
                             alt="Example image"
                             fill
@@ -229,6 +251,7 @@ const PostFormControl = (props: IProps) => {
                         name={"mainFile"}
                         control={control}
                         render={({ field }) => (
+                            // @ts-expect-error
                             <MuiFileInput
                                 inputProps={{
                                     accept: ".png, .jpeg, .jpg",

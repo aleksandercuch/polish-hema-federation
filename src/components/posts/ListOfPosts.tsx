@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "@/app/subpage.module.css";
 import { PostT } from "@/types/post.type";
@@ -25,6 +25,7 @@ import {
     query,
     limit,
     startAfter,
+    QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "../../../firebase/config/clientApp";
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
@@ -37,52 +38,57 @@ const POSTS_PER_PAGE = 10;
 const ListOfPosts = () => {
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState<PostT[]>([]);
-    const [lastDoc, setLastDoc] = useState<any | null>(null); // Store last document for pagination
-    const [hasMore, setHasMore] = useState(true); // Track if more posts exist
+    const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null);
+    const [hasMore, setHasMore] = useState(true);
     const [addPostModeActive, setAddPostModeActive] = useState(false);
     const { setPost } = usePost();
     const router = useRouter();
     const currentUser = UserAuth();
 
-    const fetchPosts = async (reset = false) => {
-        setLoading(true);
+    const fetchPosts = useCallback(
+        async (reset = false) => {
+            setLoading(true);
 
-        try {
-            let q = query(
-                collection(db, "posts"),
-                orderBy("date", "desc"),
-                limit(POSTS_PER_PAGE)
-            );
-
-            if (!reset && lastDoc) {
-                q = query(
+            try {
+                let q = query(
                     collection(db, "posts"),
                     orderBy("date", "desc"),
-                    startAfter(lastDoc),
                     limit(POSTS_PER_PAGE)
                 );
+
+                if (!reset && lastDoc) {
+                    q = query(
+                        collection(db, "posts"),
+                        orderBy("date", "desc"),
+                        startAfter(lastDoc),
+                        limit(POSTS_PER_PAGE)
+                    );
+                }
+
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    const newPosts = snapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    })) as PostT[];
+
+                    setPosts((prev) =>
+                        reset ? newPosts : [...prev, ...newPosts]
+                    );
+                    setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+                    setHasMore(snapshot.docs.length === POSTS_PER_PAGE);
+                } else {
+                    setHasMore(false);
+                }
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+            } finally {
+                setLoading(false);
             }
-
-            const snapshot = await getDocs(q);
-
-            if (!snapshot.empty) {
-                const newPosts = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                })) as PostT[];
-
-                setPosts((prev) => (reset ? newPosts : [...prev, ...newPosts]));
-                setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-                setHasMore(snapshot.docs.length === POSTS_PER_PAGE);
-            } else {
-                setHasMore(false);
-            }
-        } catch (error) {
-            console.error("Error fetching posts:", error);
-        }
-
-        setLoading(false);
-    };
+        },
+        [db, lastDoc, setLoading, setPosts, setLastDoc, setHasMore]
+    );
 
     const handleNavigation = (post: PostT) => {
         setPost(post);
@@ -91,7 +97,7 @@ const ListOfPosts = () => {
 
     useEffect(() => {
         fetchPosts(true);
-    }, []);
+    }, [fetchPosts]);
 
     return (
         <Grid container className={styles.mainContainer}>

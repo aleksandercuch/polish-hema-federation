@@ -32,13 +32,15 @@ export const LoginForm = () => {
     } = form;
 
     const submitForm = async (data: LoginParams) => {
-        currentUser?.signIn(data.email, data.password).catch((error: any) => {
-            console.log(error);
-        });
+        currentUser
+            ?.signIn(data.email, data.password)
+            .catch((error: unknown) => {
+                console.log(error);
+            });
     };
 
     const handleLogout = async () => {
-        currentUser!.logout().catch((error: any) => {
+        currentUser!.logout().catch((error: unknown) => {
             console.log(error);
         });
     };

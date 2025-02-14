@@ -8,9 +8,6 @@ import Link from "next/link";
 //TYPES
 import { PostT } from "@/types/post.type";
 
-// MOCKS
-import { mockedPosts } from "@/mocks/posts.mocks";
-
 // STYLES
 import styles from "./news.module.css";
 import {
@@ -27,20 +24,12 @@ import {
 
 // CONTEXT
 import { usePost } from "@/contexts/PostsContext";
-import {
-    query,
-    collection,
-    orderBy,
-    limit,
-    startAfter,
-    getDocs,
-} from "firebase/firestore";
+import { query, collection, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase/config/clientApp";
 
 export const NewsHome = () => {
-    const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState<PostT[]>([]);
-    const { post, setPost } = usePost();
+    const { setPost } = usePost();
     const router = useRouter();
     const theme = useTheme();
     const isReversedPost = (index: number) => {
@@ -52,10 +41,8 @@ export const NewsHome = () => {
         router.push(`/posts/${post.id}`);
     };
     const fetchPosts = async () => {
-        setLoading(true);
-
         try {
-            let q = query(
+            const q = query(
                 collection(db, "posts"),
                 orderBy("date", "desc"),
                 limit(6)
@@ -72,8 +59,6 @@ export const NewsHome = () => {
         } catch (error) {
             console.error("Error fetching posts:", error);
         }
-
-        setLoading(false);
     };
 
     useEffect(() => {
@@ -199,10 +184,11 @@ export const NewsHome = () => {
                         </Box>
                         <CardMedia
                             component="img"
-                            image={post.mainFile}
+                            image={post.mainFile as string}
                             alt="Post picture error"
                             sx={{
                                 width: { sm: "50%", xs: "100%" },
+                                maxHeight: "700px",
                                 margin: "10px",
                             }}
                         />

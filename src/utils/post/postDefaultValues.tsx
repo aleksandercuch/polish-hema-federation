@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export const defaultPostValues = {
     id: "",
     titleENG: "",
@@ -8,5 +10,5 @@ export const defaultPostValues = {
     descriptionPL: "",
     mainFile: "",
     images: [],
-    date: new Date(),
+    date: Timestamp,
 };

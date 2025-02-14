@@ -1,6 +1,8 @@
 import { memberParams } from "../management.interface";
 
-export const isMemberParams = (member: any): member is memberParams => {
+export const isMemberParams = (
+    member: memberParams
+): member is memberParams => {
     return (
         typeof member === "object" &&
         member !== null &&

@@ -1,4 +1,5 @@
-import { RawDraftContentState } from "draft-js"; // @ts-ignore
+import { RawDraftContentState } from "draft-js";
+//@ts-expect-error
 import draftToHtml from "draftjs-to-html";
 
 const preprocessRawContentState = (
@@ -8,7 +9,7 @@ const preprocessRawContentState = (
         if (block.type === "unstyled" && !block.text.trim()) {
             return {
                 ...block,
-                text: "\u200B", // Zero-width space character to preserve empty blocks
+                text: "\u200B",
             };
         }
         return block;

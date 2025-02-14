@@ -11,7 +11,6 @@ import styles from "@/app/subpage.module.css";
 import { deleteObject, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
 import {
-    addDoc,
     collection,
     deleteDoc,
     doc,
@@ -66,8 +65,8 @@ const Management = () => {
         setLoading(true);
 
         try {
-            if (member.file && (await fileExists(member.file))) {
-                await deleteObject(ref(storage, member.file));
+            if (member.file && (await fileExists(member.file as string))) {
+                await deleteObject(ref(storage, member.file as string));
             }
 
             const updatedMembers = removeElementAtIndex(
@@ -82,7 +81,7 @@ const Management = () => {
             alert(`Zakończyłeś usuwanie!`);
             fetchSections().then(() => setLoading(false));
         } catch (error) {
-            alert(`Wystąpił błąd podczas usuwania ${member.name}`);
+            alert(`Wystąpił ${error} podczas usuwania ${member.name}`);
         }
     };
     const handleAddMember = (section: sectionParams) => {
@@ -111,14 +110,15 @@ const Management = () => {
         setLoading(true);
         try {
             if (section.members && section.members.length > 0) {
+                const members = section.members as memberParams[];
                 await Promise.all(
-                    section.members
-                        .filter(isMemberParams) // Ensure only valid members are processed
-                        .map(async (member) => {
-                            if (await fileExists(member.file)) {
-                                await deleteObject(ref(storage, member.file));
-                            }
-                        })
+                    members.filter(isMemberParams).map(async (member) => {
+                        if (await fileExists(member.file as string)) {
+                            await deleteObject(
+                                ref(storage, member.file as string)
+                            );
+                        }
+                    })
                 );
             }
 
@@ -141,7 +141,7 @@ const Management = () => {
                 const dataArray = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
-                })); // @ts-ignore
+                })); //@ts-expect-error
                 setSectionsList(dataArray);
             })
             .catch((error) => {
@@ -302,8 +302,8 @@ const Management = () => {
                                                 Array.isArray(
                                                     section.members
                                                 ) &&
-                                                section.members
-                                                    .filter(isMemberParams) // Ensure only valid members are processed
+                                                section.members // @ts-expect-error
+                                                    .filter(isMemberParams)
                                                     .map((member) => (
                                                         <Grid
                                                             item
@@ -329,7 +329,7 @@ const Management = () => {
                                                                 <Avatar
                                                                     alt="Remy Sharp"
                                                                     src={
-                                                                        member.file ||
+                                                                        (member.file as string) ||
                                                                         DEFAULT_AVATAR
                                                                     }
                                                                     sx={{

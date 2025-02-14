@@ -9,8 +9,6 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Button, FormControl, Grid, Typography, Box } from "@mui/material";
 import { MuiFileInput } from "mui-file-input";
 
-// @ts-ignore
-
 //FIREBASE
 import { db, storage } from "../../../firebase/config/clientApp";
 import { doc, updateDoc } from "firebase/firestore";
@@ -64,9 +62,7 @@ const GalleryForm = (props: IProps) => {
         formState: { isSubmitting },
     } = form;
 
-    const handleImageUploads = async (
-        newImages: (File | string)[]
-    ): Promise<string[]> => {
+    const handleImageUploads = async (): Promise<string[]> => {
         const oldImages = (props.section && props.section.members) || [];
         const newFiles = uploadedFiles.filter(
             (file) => file instanceof File
@@ -112,7 +108,7 @@ const GalleryForm = (props: IProps) => {
                 data.members as string[],
                 props.section.members as string[]
             )
-                ? await handleImageUploads(data.members)
+                ? await handleImageUploads()
                 : [];
 
             updateDoc(doc(db, props.collection, props.section.id), {

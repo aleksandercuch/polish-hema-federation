@@ -82,15 +82,11 @@ const navLinks: NavLinkParams[] = [
         ref: "OpenLayersMap",
     },
 ];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 export const ResponsiveAppBar = () => {
     const pathname = usePathname();
     const router = useRouter();
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-        null
-    );
-    const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
         null
     );
 

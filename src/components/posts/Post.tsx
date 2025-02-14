@@ -1,7 +1,7 @@
 "use client";
 
 // CORE
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "@/app/subpage.module.css";
 import Link from "next/link";
@@ -12,11 +12,11 @@ import { useParams, useRouter } from "next/navigation";
 import { usePost } from "@/contexts/PostsContext";
 
 // ASSETS
-import { Button, Grid, Paper, Typography, Box } from "@mui/material";
+import { Button, Grid, Paper, Typography } from "@mui/material";
 import "react-image-gallery/styles/css/image-gallery.css";
 
 // FIREBASE
-import { collection, doc, getDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
 
@@ -38,10 +38,11 @@ import { fileExists } from "@/utils/storage/fileExistInStorage";
 
 //CONTEXT
 import { UserAuth } from "@/contexts/AuthContext";
+import { RawDraftContentState } from "react-draft-wysiwyg";
 
 const Post = () => {
-    const { id } = useParams(); // Get post ID from the URL
-    const [loading, setLoading] = useState(true);
+    const { id } = useParams();
+    const [loading, setLoading] = useState(false);
     const { post, setPost } = usePost();
     const [isEditing, setIsEditing] = useState(false);
     const router = useRouter();
@@ -56,14 +57,12 @@ const Post = () => {
         if (!confirmDelete) return;
 
         try {
-            // Delete main file if it exists
             if (post.mainFile) {
                 if (await fileExists(post.mainFile as string)) {
                     await deleteObject(ref(storage, post.mainFile as string));
                 }
             }
 
-            // Delete images if they exist
             if (post.images && post.images.length > 0) {
                 await Promise.all(
                     post.images.map(async (imageUrl) => {
@@ -77,33 +76,28 @@ const Post = () => {
                 );
             }
 
-            // Delete the Firestore document
             await deleteDoc(doc(db, "posts", post.id));
             alert("Post został usunięty.");
             router.push(`/posts`);
             setPost(defaultPostValues);
-
-            // Redirect or update UI after deletion
         } catch (error) {
             console.error("Błąd podczas usuwania posta:", error);
             alert("Wystąpił błąd podczas usuwania posta.");
         }
     };
 
-    // Fetch post from Firestore
-    const fetchPost = async () => {
+    const fetchPost = useCallback(async () => {
         if (!id) return;
         setLoading(true);
 
         try {
-            const postId = id as string; // Ensure id is a string
+            const postId = id as string;
             const postDocRef = doc(db, "posts", postId);
             const docSnap = await getDoc(postDocRef);
 
             if (docSnap.exists()) {
                 const postData = docSnap.data();
 
-                // Ensure the fetched data matches the PostT type
                 const post: PostT = {
                     id: postId,
                     titleENG: postData.titleENG || "",
@@ -116,7 +110,7 @@ const Post = () => {
                     images: postData.images || [],
                     date: postData.date,
                 };
-                setPost(post); // Now correctly typed
+                setPost(post);
             } else {
                 console.log("No such post found!");
             }
@@ -125,14 +119,13 @@ const Post = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, db, setPost, setLoading]);
 
     useEffect(() => {
         if (!post?.id) {
             fetchPost();
         }
-        post.id && setLoading(false);
-    }, []); // Runs when id changes
+    }, [fetchPost, post]);
 
     return (
         <Grid container className={styles.mainContainer}>
@@ -205,7 +198,7 @@ const Post = () => {
                                         >
                                             <Image
                                                 className={styles.postImage}
-                                                src={post.mainFile}
+                                                src={post.mainFile as string}
                                                 alt="Example image"
                                                 fill
                                                 priority
@@ -251,7 +244,7 @@ const Post = () => {
                                             <div
                                                 dangerouslySetInnerHTML={{
                                                     __html: convertDraftToHtmlWithEmptyBlocks(
-                                                        post.descriptionPL
+                                                        post.descriptionPL as RawDraftContentState
                                                     ),
                                                 }}
                                             />

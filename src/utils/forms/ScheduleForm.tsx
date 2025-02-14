@@ -1,7 +1,7 @@
 "use client";
 
 // CORE
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 // MATERIAL
@@ -37,11 +37,11 @@ const ScheduleForm = (props: IProps) => {
     const {
         control,
         handleSubmit,
-        reset,
         formState: { isSubmitting },
     } = form;
 
     const submitForm = async (data: Schedule) => {
+        console.log(data);
         if (!mainFile || mainFile.length === 0) {
             console.error("No file selected.");
             return;

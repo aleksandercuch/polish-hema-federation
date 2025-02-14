@@ -1,7 +1,7 @@
 // CORE
 "use client";
-import { useEffect, useState } from "react";
-//import { UserAuth } from "@/context/auth-context";
+import { useCallback, useEffect, useState } from "react";
+
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Avatar, Button, Grid, Typography } from "@mui/material";
@@ -13,7 +13,7 @@ import { deleteObject, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 
-// COMPONENTS
+// UTILS
 
 import { DEFAULT_AVATAR } from "@/utils/constants/constants";
 import ContactForm from "@/utils/forms/contactForm";
@@ -72,32 +72,31 @@ const Contact = (props: IProps) => {
     };
 
     const closeAdminPanel = () => {
-        contactToEdition && setContactToEdition(defaultContact);
+        contactToEdition.id != "" && setContactToEdition(defaultContact);
         setIsAdding(false);
         setIsEditing(false);
     };
 
-    const fetchContact = async () => {
+    const fetchContact = useCallback(async () => {
         setLoading(true);
-        const contactCollection = collection(db, props.collectionName);
-
-        getDocs(contactCollection)
-            .then((querySnapshot) => {
-                const dataArray = querySnapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                })); // @ts-ignore
-                setContactList(dataArray);
-            })
-            .catch((error) => {
-                console.error("Error retrieving collection: ", error);
-            });
-        setLoading(false);
-    };
+        try {
+            const contactCollection = collection(db, props.collectionName);
+            const querySnapshot = await getDocs(contactCollection);
+            const dataArray = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })); // @ts-expect-error
+            setContactList(dataArray);
+        } catch (error) {
+            console.error("Error retrieving collection: ", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [props.collectionName]);
 
     useEffect(() => {
         fetchContact();
-    }, []);
+    }, [fetchContact]);
 
     return (
         <Grid
@@ -135,7 +134,10 @@ const Contact = (props: IProps) => {
                                     <Grid item xs={12} lg={4}>
                                         <Avatar
                                             alt="Remy Sharp"
-                                            src={element.file || DEFAULT_AVATAR}
+                                            src={
+                                                (element.file as string) ||
+                                                DEFAULT_AVATAR
+                                            }
                                             sx={{
                                                 width: 120,
                                                 height: 120,

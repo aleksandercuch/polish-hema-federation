@@ -9,7 +9,6 @@ import {
     Button,
     FormControl,
     Grid,
-    Paper,
     Typography,
     TextField,
 } from "@mui/material";
@@ -26,16 +25,11 @@ import { db, storage } from "../../../firebase/config/clientApp";
 import { doc, updateDoc } from "firebase/firestore";
 
 // COMPONENTS
-import { SubPageBanner } from "@/components/banner/SubPageBanner";
 import { addRandomSuffix } from "@/utils/post/addRandomSuffix";
 import { DEFAULT_AVATAR } from "@/utils/constants/constants";
 
 // TYPES
-import {
-    memberParams,
-    requestSectionParams,
-    sectionParams,
-} from "@/types/management.interface";
+import { memberParams, sectionParams } from "@/types/management.interface";
 import { OPERATION_MODE } from "../constants/operationModeEnum";
 
 interface IProps {
@@ -63,7 +57,7 @@ export const MemberForm = (props: IProps) => {
             name: props.member?.name || "",
             descriptionPL: props.member?.descriptionPL || "",
             descriptionENG: props.member?.descriptionENG || "",
-            file: null,
+            file: "",
         },
     });
 
@@ -81,7 +75,7 @@ export const MemberForm = (props: IProps) => {
         try {
             let downloadURL = "";
 
-            if (data?.file?.name) {
+            if (data?.file instanceof File) {
                 const fileName = `managementImages/${addRandomSuffix(
                     data.file.name
                 )}`;
@@ -104,11 +98,14 @@ export const MemberForm = (props: IProps) => {
                 }
             }
             const newMember: memberParams = {
-                id: props.member?.id || props.section.members.length,
+                id: props.member!.id || props.section.members.length,
                 descriptionPL: data.descriptionPL,
                 descriptionENG: data.descriptionENG,
                 name: data.name,
-                file: downloadURL || (props.member && props.member.file),
+                file:
+                    downloadURL != ""
+                        ? downloadURL
+                        : (props.member!.file as string),
             };
 
             if (props.mode === OPERATION_MODE.Edit && props.member) {
@@ -149,7 +146,7 @@ export const MemberForm = (props: IProps) => {
             setValue("descriptionPL", props.member.descriptionPL || "");
             setValue("descriptionENG", props.member.descriptionENG || "");
         }
-    }, [props.member]);
+    }, [props.member, setValue]);
 
     return (
         <FormControl
@@ -168,7 +165,7 @@ export const MemberForm = (props: IProps) => {
                     file instanceof File
                         ? URL.createObjectURL(file)
                         : props.member
-                        ? props.member.file
+                        ? (props.member.file as string)
                         : DEFAULT_AVATAR
                 }
                 sx={{
@@ -182,6 +179,7 @@ export const MemberForm = (props: IProps) => {
                 name={"file"}
                 control={control}
                 render={({ field }) => (
+                    // @ts-expect-error
                     <MuiFileInput
                         inputProps={{
                             accept: ".png, .jpeg, .jpg",
