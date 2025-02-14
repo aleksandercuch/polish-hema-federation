@@ -88,7 +88,7 @@ export const NewsHome = () => {
                             : 6
                     }
                     sx={{
-                        maxHeight: posts.length == 5 ? "240px" : "undefined",
+                        maxHeight: posts.length == 5 ? "240px" : "30vh",
                     }}
                     key={post.id}
                 >
@@ -189,7 +189,6 @@ export const NewsHome = () => {
                             sx={{
                                 width: { sm: "50%", xs: "100%" },
                                 maxHeight: "700px",
-                                margin: "10px",
                             }}
                         />
                     </Card>
