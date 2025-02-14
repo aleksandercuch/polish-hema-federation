@@ -215,9 +215,9 @@ const PostFormControl = (props: IProps) => {
 
     useEffect(() => {
         if (props.mode === OPERATION_MODE.Add) {
-            if (post.id) {
-                setPost(defaultPostValues);
-            }
+            // if (post.id) {
+            //     setPost(defaultPostValues);
+            // }
             reset();
         }
         if (props.mode === OPERATION_MODE.Edit) {

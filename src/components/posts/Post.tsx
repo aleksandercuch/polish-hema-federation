@@ -19,6 +19,7 @@ import "react-image-gallery/styles/css/image-gallery.css";
 import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
+import { Timestamp } from "firebase/firestore";
 
 // COMPONENTS
 import { Loader } from "@/components/loader/loader";
@@ -79,7 +80,7 @@ const Post = () => {
             await deleteDoc(doc(db, "posts", post.id));
             alert("Post został usunięty.");
             router.push(`/posts`);
-            setPost(defaultPostValues);
+            // setPost(defaultPostValues);
         } catch (error) {
             console.error("Błąd podczas usuwania posta:", error);
             alert("Wystąpił błąd podczas usuwania posta.");
@@ -186,7 +187,7 @@ const Post = () => {
                                             <Typography variant="body1">
                                                 {dayjs(
                                                     convertFirebaseTimestamp(
-                                                        post.date
+                                                        post.date as Timestamp
                                                     )
                                                 ).format("DD/MM/YYYY")}
                                             </Typography>
