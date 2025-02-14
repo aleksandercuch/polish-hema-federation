@@ -1,35 +1,19 @@
 // CORE
 "use client";
-import { ComponentType, FC, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { convertFromRaw, EditorState, RawDraftContentState } from "draft-js";
+import { useEffect, useState } from "react";
 
-//import { UserAuth } from "@/context/auth-context";
-import dynamic from "next/dynamic";
-import { EditorProps } from "react-draft-wysiwyg";
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import {
-    Avatar,
-    Button,
-    FormControl,
-    Grid,
-    Paper,
-    Typography,
-    TextField,
-} from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 import ImageGallery from "react-image-gallery";
 import styles from "@/app/subpage.module.css";
 import "react-image-gallery/styles/css/image-gallery.css";
 import "./gallery.css";
-// @ts-ignore
-import draftToHtml from "draftjs-to-html";
 
 //FIREBASE
 import { deleteObject, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
 import {
-    addDoc,
     collection,
     deleteDoc,
     doc,
@@ -38,33 +22,25 @@ import {
 } from "firebase/firestore";
 
 // COMPONENTS
-import { SubPageBanner } from "@/components/banner/SubPageBanner";
-import { DEFAULT_AVATAR } from "@/utils/constants/constants";
 import CreateSectionForm from "@/utils/forms/createSectionForm";
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 import { Loader } from "../loader/loader";
 
 // TYPES
 import {
-    defaultMember,
     defaultSection,
     memberParams,
     sectionParams,
 } from "@/types/management.interface";
-import { MemberForm } from "@/utils/forms/memberForm";
-import { fileExists } from "@/utils/storage/fileExistInStorage";
+import { isStringArray } from "@/types/typeGuards/isArrayofStrings";
 
 // UTILS
-import { removeElementAtIndex } from "@/utils/array/deleteWithIndex";
-import { isStringArray } from "@/types/typeGuards/isArrayofStrings";
 import { convertImagesToGallery } from "@/utils/post/convertImagesToGallery";
+import { fileExists } from "@/utils/storage/fileExistInStorage";
 import GalleryForm from "@/utils/forms/GalleryForm";
 
-const breakpointColumns = {
-    default: 3,
-    1100: 2,
-    700: 1,
-};
+// CONTEXT
+import { UserAuth } from "@/contexts/AuthContext";
 
 const Gallery = () => {
     const [sectionsList, setSectionsList] = useState<sectionParams[]>([]);
@@ -73,42 +49,8 @@ const Gallery = () => {
     const [addingImages, setAddingImages] = useState<boolean>(false);
     const [mode, setMode] = useState<OPERATION_MODE>(OPERATION_MODE.None);
     const [loading, setLoading] = useState(false);
+    const currentUser = UserAuth();
 
-    const handleDeleteMember = async (
-        section: sectionParams,
-        member: memberParams
-    ) => {
-        if (!section.id) return;
-
-        const confirmDelete = window.confirm(
-            `Czy na pewno chcesz usunąć ${member.name}?`
-        );
-        if (!confirmDelete) return;
-        setLoading(true);
-
-        try {
-            // Delete image if  exists
-            if (member.file && (await fileExists(member.file))) {
-                await deleteObject(ref(storage, member.file));
-            }
-
-            // Update document
-            const updatedMembers = removeElementAtIndex(
-                section.members as string[],
-                member.id
-            );
-            // Updating an existing member
-            await updateDoc(doc(db, "management", section.id), {
-                name: section.name,
-                members: updatedMembers,
-            });
-
-            alert(`Zakończyłeś usuwanie!`);
-            fetchSections().then(() => setLoading(false));
-        } catch (error) {
-            alert(`Wystąpił błąd podczas usuwania ${member.name}`);
-        }
-    };
     const handleEditImages = (section: sectionParams) => {
         setMode(OPERATION_MODE.Edit);
         setAddingImages(true);
@@ -230,67 +172,75 @@ const Gallery = () => {
                                             </Typography>
                                         </Grid>
                                     </Grid>
-                                    <Grid
-                                        item
-                                        container
-                                        xs={12}
-                                        sx={{
-                                            justifyContent: "center",
-                                        }}
-                                        spacing={2}
-                                    >
-                                        <Grid item>
-                                            <Button
-                                                type="submit"
-                                                color="error"
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{
-                                                    mb: 2,
-                                                    mt: 2,
-                                                }}
-                                                onClick={() =>
-                                                    handleEditSection(section)
-                                                }
-                                            >
-                                                Edytuj nazwę
-                                            </Button>
+                                    {currentUser?.user?.email && (
+                                        <Grid
+                                            item
+                                            container
+                                            xs={12}
+                                            sx={{
+                                                justifyContent: "center",
+                                            }}
+                                            spacing={2}
+                                        >
+                                            <Grid item>
+                                                <Button
+                                                    type="submit"
+                                                    color="error"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{
+                                                        mb: 2,
+                                                        mt: 2,
+                                                    }}
+                                                    onClick={() =>
+                                                        handleEditSection(
+                                                            section
+                                                        )
+                                                    }
+                                                >
+                                                    Edytuj nazwę
+                                                </Button>
+                                            </Grid>
+                                            <Grid item>
+                                                <Button
+                                                    type="submit"
+                                                    color="error"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{
+                                                        mb: 2,
+                                                        mt: 2,
+                                                    }}
+                                                    onClick={() =>
+                                                        handleEditImages(
+                                                            section
+                                                        )
+                                                    }
+                                                >
+                                                    Dodaj Zdjęcia
+                                                </Button>
+                                            </Grid>
+                                            <Grid item>
+                                                <Button
+                                                    type="submit"
+                                                    color="error"
+                                                    variant="contained"
+                                                    size="small"
+                                                    sx={{
+                                                        mb: 2,
+                                                        mt: 2,
+                                                    }}
+                                                    onClick={() =>
+                                                        handleDeleteSection(
+                                                            section
+                                                        )
+                                                    }
+                                                >
+                                                    Usuń sekcję
+                                                </Button>
+                                            </Grid>
                                         </Grid>
-                                        <Grid item>
-                                            <Button
-                                                type="submit"
-                                                color="error"
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{
-                                                    mb: 2,
-                                                    mt: 2,
-                                                }}
-                                                onClick={() =>
-                                                    handleEditImages(section)
-                                                }
-                                            >
-                                                Dodaj Zdjęcia
-                                            </Button>
-                                        </Grid>
-                                        <Grid item>
-                                            <Button
-                                                type="submit"
-                                                color="error"
-                                                variant="contained"
-                                                size="small"
-                                                sx={{
-                                                    mb: 2,
-                                                    mt: 2,
-                                                }}
-                                                onClick={() =>
-                                                    handleDeleteSection(section)
-                                                }
-                                            >
-                                                Usuń sekcję
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
+                                    )}
                                     {section.members.length > 0 && (
                                         <Grid
                                             item
@@ -308,23 +258,27 @@ const Gallery = () => {
                                     )}
                                 </Grid>
                             ))}
-                            <Grid
-                                item
-                                container
-                                xs={12}
-                                sx={{ paddingBottom: "40px" }}
-                            >
-                                <Button
-                                    fullWidth
-                                    type="submit"
-                                    variant="contained"
-                                    size="small"
-                                    sx={{ mb: 2 }}
-                                    onClick={() => setMode(OPERATION_MODE.Add)}
+                            {currentUser?.user?.email && (
+                                <Grid
+                                    item
+                                    container
+                                    xs={12}
+                                    sx={{ paddingBottom: "40px" }}
                                 >
-                                    Dodaj Nową Sekcję
-                                </Button>
-                            </Grid>
+                                    <Button
+                                        fullWidth
+                                        type="submit"
+                                        variant="contained"
+                                        size="small"
+                                        sx={{ mb: 2 }}
+                                        onClick={() =>
+                                            setMode(OPERATION_MODE.Add)
+                                        }
+                                    >
+                                        Dodaj Nową Sekcję
+                                    </Button>
+                                </Grid>
+                            )}
                         </>
                     ) : (
                         <>

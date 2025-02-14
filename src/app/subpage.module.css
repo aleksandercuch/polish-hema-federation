@@ -5,7 +5,6 @@
 
 .subpageBackground {
     z-index: 10;
-    width: 55%;
     background-color: rgba(255, 0, 0, 0.5);
     position: relative;
     top: 35vh;
@@ -26,7 +25,6 @@
 
 .postContainer {
     z-index: 10;
-    padding: 70px 100px;
     margin: 20px;
 }
 

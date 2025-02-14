@@ -1,26 +1,11 @@
 // CORE
 "use client";
-import { ComponentType, FC, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { convertFromRaw, EditorState, RawDraftContentState } from "draft-js";
-//import { UserAuth } from "@/context/auth-context";
-import dynamic from "next/dynamic";
-import { EditorProps } from "react-draft-wysiwyg";
+import { useEffect, useState } from "react";
+
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import {
-    Avatar,
-    Button,
-    FormControl,
-    Grid,
-    Paper,
-    Typography,
-    TextField,
-} from "@mui/material";
+import { Avatar, Button, Grid, Paper, Typography } from "@mui/material";
 import styles from "@/app/subpage.module.css";
-
-// @ts-ignore
-import draftToHtml from "draftjs-to-html";
 
 //FIREBASE
 import { deleteObject, ref } from "firebase/storage";
@@ -36,9 +21,6 @@ import {
 
 // COMPONENTS
 import { SubPageBanner } from "@/components/banner/SubPageBanner";
-import { DEFAULT_AVATAR } from "@/utils/constants/constants";
-import CreateSectionForm from "@/utils/forms/createSectionForm";
-import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 import { Loader } from "../loader/loader";
 
 // TYPES
@@ -48,12 +30,18 @@ import {
     memberParams,
     sectionParams,
 } from "@/types/management.interface";
-import { MemberForm } from "@/utils/forms/memberForm";
-import { fileExists } from "@/utils/storage/fileExistInStorage";
+import { isMemberParams } from "@/types/typeGuards/isMemberParams";
 
 // UTILS
 import { removeElementAtIndex } from "@/utils/array/deleteWithIndex";
-import { isMemberParams } from "@/types/typeGuards/isMemberParams";
+import { MemberForm } from "@/utils/forms/memberForm";
+import { fileExists } from "@/utils/storage/fileExistInStorage";
+import { DEFAULT_AVATAR } from "@/utils/constants/constants";
+import CreateSectionForm from "@/utils/forms/createSectionForm";
+import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
+
+//CONTEXT
+import { UserAuth } from "@/contexts/AuthContext";
 
 const Management = () => {
     const [sectionsList, setSectionsList] = useState<sectionParams[]>([]);
@@ -63,6 +51,7 @@ const Management = () => {
         useState<memberParams>(defaultMember);
     const [mode, setMode] = useState<OPERATION_MODE>(OPERATION_MODE.None);
     const [loading, setLoading] = useState(false);
+    const currentUser = UserAuth();
 
     const handleDeleteMember = async (
         section: sectionParams,
@@ -77,17 +66,14 @@ const Management = () => {
         setLoading(true);
 
         try {
-            // Delete image if  exists
             if (member.file && (await fileExists(member.file))) {
                 await deleteObject(ref(storage, member.file));
             }
 
-            // Update document
             const updatedMembers = removeElementAtIndex(
                 section.members as memberParams[],
                 member.id
             );
-            // Updating an existing member
             await updateDoc(doc(db, "management", section.id), {
                 name: section.name,
                 members: updatedMembers,
@@ -124,7 +110,6 @@ const Management = () => {
         if (!confirmDelete) return;
         setLoading(true);
         try {
-            // Delete images if they exist
             if (section.members && section.members.length > 0) {
                 await Promise.all(
                     section.members
@@ -137,14 +122,11 @@ const Management = () => {
                 );
             }
 
-            // Delete the Firestore document
             await deleteDoc(doc(db, "management", section.id)).then(() => {
                 fetchSections();
                 alert("Sekcja została usunięta.");
             });
             setLoading(false);
-
-            // Redirect or update UI after deletion
         } catch (error) {
             console.error("Błąd podczas usuwania posta:", error);
             alert("Wystąpił błąd podczas usuwania posta.");
@@ -158,10 +140,9 @@ const Management = () => {
             .then((querySnapshot) => {
                 const dataArray = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
-                    ...doc.data(), // Spread the document data
+                    ...doc.data(),
                 })); // @ts-ignore
-                setSectionsList(dataArray); // Logs the collection as an array
-                console.log(dataArray);
+                setSectionsList(dataArray);
             })
             .catch((error) => {
                 console.error("Error retrieving collection: ", error);
@@ -241,78 +222,82 @@ const Management = () => {
                                                     <Typography
                                                         variant="h4"
                                                         component="h3"
+                                                        sx={{ mb: 5 }}
                                                     >
                                                         {section.name}
                                                     </Typography>
                                                 </Grid>
                                             </Grid>
-                                            <Grid
-                                                item
-                                                container
-                                                xs={12}
-                                                sx={{
-                                                    justifyContent: "center",
-                                                }}
-                                                spacing={2}
-                                            >
-                                                <Grid item>
-                                                    <Button
-                                                        type="submit"
-                                                        color="error"
-                                                        variant="outlined"
-                                                        size="small"
-                                                        sx={{
-                                                            mb: 2,
-                                                            mt: 2,
-                                                        }}
-                                                        onClick={() =>
-                                                            handleEditSection(
-                                                                section
-                                                            )
-                                                        }
-                                                    >
-                                                        Edytuj nazwę
-                                                    </Button>
+                                            {currentUser?.user?.email && (
+                                                <Grid
+                                                    item
+                                                    container
+                                                    xs={12}
+                                                    sx={{
+                                                        justifyContent:
+                                                            "center",
+                                                    }}
+                                                    spacing={2}
+                                                >
+                                                    <Grid item>
+                                                        <Button
+                                                            type="submit"
+                                                            color="error"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            sx={{
+                                                                mb: 2,
+                                                                mt: 2,
+                                                            }}
+                                                            onClick={() =>
+                                                                handleEditSection(
+                                                                    section
+                                                                )
+                                                            }
+                                                        >
+                                                            Edytuj nazwę
+                                                        </Button>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Button
+                                                            type="submit"
+                                                            color="error"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            sx={{
+                                                                mb: 2,
+                                                                mt: 2,
+                                                            }}
+                                                            onClick={() =>
+                                                                handleAddMember(
+                                                                    section
+                                                                )
+                                                            }
+                                                        >
+                                                            Dodaj Osobę
+                                                        </Button>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Button
+                                                            type="submit"
+                                                            color="error"
+                                                            variant="contained"
+                                                            size="small"
+                                                            sx={{
+                                                                mb: 2,
+                                                                mt: 2,
+                                                            }}
+                                                            onClick={() =>
+                                                                handleDeleteSection(
+                                                                    section
+                                                                )
+                                                            }
+                                                        >
+                                                            Usuń sekcję
+                                                        </Button>
+                                                    </Grid>
                                                 </Grid>
-                                                <Grid item>
-                                                    <Button
-                                                        type="submit"
-                                                        color="error"
-                                                        variant="outlined"
-                                                        size="small"
-                                                        sx={{
-                                                            mb: 2,
-                                                            mt: 2,
-                                                        }}
-                                                        onClick={() =>
-                                                            handleAddMember(
-                                                                section
-                                                            )
-                                                        }
-                                                    >
-                                                        Dodaj Osobę
-                                                    </Button>
-                                                </Grid>
-                                                <Grid item>
-                                                    <Button
-                                                        type="submit"
-                                                        color="error"
-                                                        variant="contained"
-                                                        size="small"
-                                                        sx={{
-                                                            mb: 2,
-                                                            mt: 2,
-                                                        }}
-                                                        onClick={() =>
-                                                            handleDeleteSection(
-                                                                section
-                                                            )
-                                                        }
-                                                    >
-                                                        Usuń sekcję
-                                                    </Button>
-                                                </Grid>
-                                            </Grid>
+                                            )}
                                             {section.members &&
                                                 Array.isArray(
                                                     section.members
@@ -348,8 +333,8 @@ const Management = () => {
                                                                         DEFAULT_AVATAR
                                                                     }
                                                                     sx={{
-                                                                        width: 156,
-                                                                        height: 156,
+                                                                        width: 120,
+                                                                        height: 120,
                                                                         margin: "auto",
                                                                     }}
                                                                 />
@@ -360,6 +345,18 @@ const Management = () => {
                                                                 xs={12}
                                                                 lg={8}
                                                                 spacing={2}
+                                                                sx={{
+                                                                    justifyContent:
+                                                                        {
+                                                                            xs: "center",
+                                                                            lg: "flex-start",
+                                                                        },
+
+                                                                    textAlign: {
+                                                                        xs: "center",
+                                                                        lg: "left",
+                                                                    },
+                                                                }}
                                                             >
                                                                 <Grid
                                                                     item
@@ -382,83 +379,88 @@ const Management = () => {
                                                                     </Typography>
                                                                 </Grid>
                                                             </Grid>
-                                                            <Grid
-                                                                item
-                                                                container
-                                                                xs={12}
-                                                                sx={{
-                                                                    justifyContent:
-                                                                        "center",
-                                                                }}
-                                                                spacing={2}
-                                                            >
-                                                                <Grid item>
-                                                                    <Button
-                                                                        type="submit"
-                                                                        color="error"
-                                                                        variant="outlined"
-                                                                        size="small"
-                                                                        sx={{
-                                                                            mb: 2,
-                                                                            mt: 2,
-                                                                        }}
-                                                                        onClick={() =>
-                                                                            handleEditMember(
-                                                                                section,
-                                                                                member
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        Edytuj{" "}
-                                                                        {
-                                                                            member.name
-                                                                        }
-                                                                    </Button>
+                                                            {currentUser?.user
+                                                                ?.email && (
+                                                                <Grid
+                                                                    item
+                                                                    container
+                                                                    xs={12}
+                                                                    sx={{
+                                                                        justifyContent:
+                                                                            "center",
+                                                                    }}
+                                                                    spacing={2}
+                                                                >
+                                                                    <Grid item>
+                                                                        <Button
+                                                                            type="submit"
+                                                                            color="error"
+                                                                            variant="outlined"
+                                                                            size="small"
+                                                                            sx={{
+                                                                                mb: 2,
+                                                                                mt: 2,
+                                                                            }}
+                                                                            onClick={() =>
+                                                                                handleEditMember(
+                                                                                    section,
+                                                                                    member
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Edytuj{" "}
+                                                                            {
+                                                                                member.name
+                                                                            }
+                                                                        </Button>
+                                                                    </Grid>
+                                                                    <Grid item>
+                                                                        <Button
+                                                                            type="submit"
+                                                                            color="error"
+                                                                            variant="contained"
+                                                                            size="small"
+                                                                            sx={{
+                                                                                mb: 2,
+                                                                                mt: 2,
+                                                                            }}
+                                                                            onClick={() =>
+                                                                                handleDeleteMember(
+                                                                                    section,
+                                                                                    member
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Usuń
+                                                                        </Button>
+                                                                    </Grid>
                                                                 </Grid>
-                                                                <Grid item>
-                                                                    <Button
-                                                                        type="submit"
-                                                                        color="error"
-                                                                        variant="contained"
-                                                                        size="small"
-                                                                        sx={{
-                                                                            mb: 2,
-                                                                            mt: 2,
-                                                                        }}
-                                                                        onClick={() =>
-                                                                            handleDeleteMember(
-                                                                                section,
-                                                                                member
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        Usuń
-                                                                    </Button>
-                                                                </Grid>
-                                                            </Grid>
+                                                            )}
                                                         </Grid>
                                                     ))}
                                         </Grid>
                                     ))}
-                                    <Grid
-                                        item
-                                        container
-                                        xs={12}
-                                        sx={{ paddingBottom: "40px" }}
-                                    >
-                                        <Button
-                                            fullWidth
-                                            type="submit"
-                                            variant="contained"
-                                            size="small"
-                                            sx={{ mb: 2 }}
-                                            onClick={() =>
-                                                setMode(OPERATION_MODE.Add)
-                                            }
+                                    {currentUser?.user?.email && (
+                                        <Grid
+                                            item
+                                            container
+                                            xs={12}
+                                            sx={{ paddingBottom: "40px" }}
                                         >
-                                            Dodaj Nową Sekcję
-                                        </Button>
-                                    </Grid>
+                                            <Button
+                                                fullWidth
+                                                type="submit"
+                                                variant="contained"
+                                                size="small"
+                                                sx={{ mb: 2 }}
+                                                onClick={() =>
+                                                    setMode(OPERATION_MODE.Add)
+                                                }
+                                            >
+                                                Dodaj Nową Sekcję
+                                            </Button>
+                                        </Grid>
+                                    )}
                                 </>
                             ) : (
                                 <>

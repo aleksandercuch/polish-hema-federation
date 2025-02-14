@@ -112,7 +112,7 @@ export const ResponsiveAppBar = () => {
                 await router.push(link.url);
 
                 const intervalId = setInterval(() => {
-                    const element = document.getElementById(link.ref);
+                    const element = document.getElementById(link.ref as string);
                     if (element) {
                         element.scrollIntoView({ behavior: "smooth" });
                         clearInterval(intervalId);
@@ -134,7 +134,7 @@ export const ResponsiveAppBar = () => {
                 <Toolbar disableGutters>
                     <Link href="/">
                         <Image
-                            src="/logo.jpg"
+                            src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/logo.jpg?alt=media&token=3d146e44-6a45-4367-b9ed-3708f2e4bb46"
                             alt="Example image"
                             width={150}
                             height={100}

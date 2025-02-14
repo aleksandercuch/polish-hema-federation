@@ -29,6 +29,9 @@ import {
 import { db } from "../../../firebase/config/clientApp";
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 
+//CONTEXT
+import { UserAuth } from "@/contexts/AuthContext";
+
 const POSTS_PER_PAGE = 10;
 
 const ListOfPosts = () => {
@@ -39,6 +42,7 @@ const ListOfPosts = () => {
     const [addPostModeActive, setAddPostModeActive] = useState(false);
     const { setPost } = usePost();
     const router = useRouter();
+    const currentUser = UserAuth();
 
     const fetchPosts = async (reset = false) => {
         setLoading(true);
@@ -68,8 +72,8 @@ const ListOfPosts = () => {
                 })) as PostT[];
 
                 setPosts((prev) => (reset ? newPosts : [...prev, ...newPosts]));
-                setLastDoc(snapshot.docs[snapshot.docs.length - 1]); // Save last document for pagination
-                setHasMore(snapshot.docs.length === POSTS_PER_PAGE); // If less than 10, no more data
+                setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+                setHasMore(snapshot.docs.length === POSTS_PER_PAGE);
             } else {
                 setHasMore(false);
             }
@@ -86,16 +90,32 @@ const ListOfPosts = () => {
     };
 
     useEffect(() => {
-        fetchPosts(true); // Fetch first page on mount
+        fetchPosts(true);
     }, []);
 
     return (
         <Grid container className={styles.mainContainer}>
             <Grid item className={styles.postBanner}>
-                <Image src="/banner.jpg" alt="Example image" fill priority />
+                <Image
+                    src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/banner.jpg?alt=media&token=1f1dffd9-bb98-4e88-8e46-53324347f806"
+                    alt="Example image"
+                    fill
+                    priority
+                />
             </Grid>
-            <Paper className={styles.subpageBackground}>
-                <Paper className={styles.postContainer}>
+            <Paper
+                className={styles.subpageBackground}
+                sx={{
+                    width: {
+                        xs: "100%",
+                        lg: "55%",
+                    },
+                }}
+            >
+                <Paper
+                    className={styles.postContainer}
+                    sx={{ padding: { md: "70px 100px", xs: "10px" } }}
+                >
                     <Grid
                         container
                         direction="column"
@@ -108,12 +128,17 @@ const ListOfPosts = () => {
                         <Grid
                             item
                             container
-                            sx={{ justifyContent: "space-between" }}
+                            sx={{
+                                justifyContent: {
+                                    md: "space-between",
+                                    xs: "center",
+                                },
+                            }}
                         >
                             <Grid item>
                                 <Typography variant="h3">Posty</Typography>
                             </Grid>
-                            {!addPostModeActive && (
+                            {!addPostModeActive && currentUser?.user?.email && (
                                 <Grid item>
                                     <Button
                                         variant="outlined"
@@ -142,16 +167,21 @@ const ListOfPosts = () => {
                                             >
                                                 <Card
                                                     sx={{
-                                                        display: "flex",
+                                                        display: {
+                                                            xs: "inherit",
+                                                            md: "flex",
+                                                        },
                                                         flexDirection: "row",
                                                         textAlign: "center",
                                                         height: "100%",
-                                                        maxHeight: "400px",
                                                     }}
                                                 >
                                                     <Box
                                                         sx={{
-                                                            width: "50%",
+                                                            width: {
+                                                                xs: "100%",
+                                                                md: "50%",
+                                                            },
                                                             alignContent:
                                                                 "center",
                                                         }}
@@ -222,7 +252,12 @@ const ListOfPosts = () => {
                                                             post.mainFile as string
                                                         }
                                                         alt="Post picture error"
-                                                        sx={{ width: "50%" }}
+                                                        sx={{
+                                                            width: {
+                                                                xs: "100%",
+                                                                md: "50%",
+                                                            },
+                                                        }}
                                                     />
                                                 </Card>
                                             </Grid>

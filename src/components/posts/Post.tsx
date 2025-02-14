@@ -11,7 +11,7 @@ import { useParams, useRouter } from "next/navigation";
 // CONTEXT
 import { usePost } from "@/contexts/PostsContext";
 
-// MATERIAL UI
+// ASSETS
 import { Button, Grid, Paper, Typography, Box } from "@mui/material";
 import "react-image-gallery/styles/css/image-gallery.css";
 
@@ -19,11 +19,14 @@ import "react-image-gallery/styles/css/image-gallery.css";
 import { collection, doc, getDoc, deleteDoc } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
+
 // COMPONENTS
 import { Loader } from "@/components/loader/loader";
 import PostFormControl from "./PostFormControl";
-import { PostT } from "@/types/post.type";
 import ImageGallery from "react-image-gallery";
+
+// TYPES
+import { PostT } from "@/types/post.type";
 
 // UTILS
 import { convertDraftToHtmlWithEmptyBlocks } from "@/utils/editor/convertFunction";
@@ -33,12 +36,16 @@ import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 import { defaultPostValues } from "@/utils/post/postDefaultValues";
 import { fileExists } from "@/utils/storage/fileExistInStorage";
 
+//CONTEXT
+import { UserAuth } from "@/contexts/AuthContext";
+
 const Post = () => {
     const { id } = useParams(); // Get post ID from the URL
     const [loading, setLoading] = useState(true);
     const { post, setPost } = usePost();
     const [isEditing, setIsEditing] = useState(false);
     const router = useRouter();
+    const currentUser = UserAuth();
 
     const deletePost = async () => {
         if (!post?.id) return;
@@ -109,7 +116,6 @@ const Post = () => {
                     images: postData.images || [],
                     date: postData.date,
                 };
-                console.log(post);
                 setPost(post); // Now correctly typed
             } else {
                 console.log("No such post found!");
@@ -126,21 +132,36 @@ const Post = () => {
             fetchPost();
         }
         post.id && setLoading(false);
-        console.log(loading);
     }, []); // Runs when id changes
 
     return (
         <Grid container className={styles.mainContainer}>
             <Grid item className={styles.postBanner}>
-                <Image src="/banner.jpg" alt="Example image" fill priority />
+                <Image
+                    src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/banner.jpg?alt=media&token=1f1dffd9-bb98-4e88-8e46-53324347f806"
+                    alt="Example image"
+                    fill
+                    priority
+                />
             </Grid>
-            <Paper className={styles.subpageBackground}>
+            <Paper
+                className={styles.subpageBackground}
+                sx={{
+                    width: {
+                        xs: "100%",
+                        lg: "55%",
+                    },
+                }}
+            >
                 <Paper>
                     <Link href={"/posts"}>
                         <Button>Wszystkie posty</Button>
                     </Link>
                 </Paper>
-                <Paper className={styles.postContainer}>
+                <Paper
+                    className={styles.postContainer}
+                    sx={{ padding: { md: "70px 100px", xs: "10px" } }}
+                >
                     {post.id && !loading ? (
                         <>
                             {!isEditing ? (
@@ -190,36 +211,40 @@ const Post = () => {
                                                 priority
                                             />
                                         </Grid>
-                                        <Grid
-                                            item
-                                            container
-                                            direction="row"
-                                            spacing={2}
-                                        >
-                                            <Grid item xs={6}>
-                                                <Button
-                                                    variant="outlined"
-                                                    color="error"
-                                                    fullWidth
-                                                    onClick={() =>
-                                                        setIsEditing(true)
-                                                    }
-                                                >
-                                                    Edytuj
-                                                </Button>
+                                        {currentUser?.user?.email && (
+                                            <Grid
+                                                item
+                                                container
+                                                direction="row"
+                                                spacing={2}
+                                            >
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        variant="outlined"
+                                                        color="error"
+                                                        fullWidth
+                                                        onClick={() =>
+                                                            setIsEditing(true)
+                                                        }
+                                                    >
+                                                        Edytuj
+                                                    </Button>
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    {" "}
+                                                    <Button
+                                                        variant="contained"
+                                                        color="error"
+                                                        fullWidth
+                                                        onClick={() =>
+                                                            deletePost()
+                                                        }
+                                                    >
+                                                        Usuń
+                                                    </Button>
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={6}>
-                                                {" "}
-                                                <Button
-                                                    variant="contained"
-                                                    color="error"
-                                                    fullWidth
-                                                    onClick={() => deletePost()}
-                                                >
-                                                    Usuń
-                                                </Button>
-                                            </Grid>
-                                        </Grid>
+                                        )}
                                     </Grid>
                                     {post.descriptionPL && (
                                         <Grid item container>

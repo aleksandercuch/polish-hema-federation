@@ -1,5 +1,6 @@
 .news {
-    min-height: 100vh;
+    position: relative;
+    z-index: 2;
 }
 
 .news a {
@@ -8,6 +9,6 @@
 
 .postsButton {
     height: 75px;
-    color: black;
+    color: white;
     border: 1px solid black;
 }

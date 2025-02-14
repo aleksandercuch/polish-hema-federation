@@ -2,7 +2,6 @@
 "use client";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-//import { UserAuth } from "@/context/auth-context";
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import {
@@ -14,9 +13,6 @@ import {
     Typography,
     TextField,
 } from "@mui/material";
-import styles from "@/app/subpage.module.css";
-import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
-import EmailIcon from "@mui/icons-material/Email";
 import { MuiFileInput } from "mui-file-input";
 
 //FIREBASE
@@ -27,13 +23,7 @@ import {
     uploadBytes,
 } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
-import {
-    addDoc,
-    collection,
-    doc,
-    getDocs,
-    updateDoc,
-} from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 
 // COMPONENTS
 import { SubPageBanner } from "@/components/banner/SubPageBanner";
@@ -91,18 +81,15 @@ export const MemberForm = (props: IProps) => {
         try {
             let downloadURL = "";
 
-            // If a new file is uploaded
             if (data?.file?.name) {
                 const fileName = `managementImages/${addRandomSuffix(
                     data.file.name
                 )}`;
                 const storageRef = ref(storage, fileName);
 
-                // Upload new image
                 const snapshot = await uploadBytes(storageRef, data.file);
                 downloadURL = await getDownloadURL(snapshot.ref);
 
-                // Delete old image if it exists and is stored in Firebase
                 if (
                     props.member?.file &&
                     typeof props.member.file === "string" &&
@@ -130,7 +117,7 @@ export const MemberForm = (props: IProps) => {
                     props.member.id,
                     newMember
                 );
-                // Updating an existing member
+
                 await updateDoc(doc(db, "management", props.section.id), {
                     name: props.section.name,
                     members: updatedMembers,
@@ -138,18 +125,15 @@ export const MemberForm = (props: IProps) => {
 
                 alert(`Zakończyłeś edycję ${data.name}!`);
             } else {
-                console.log("ADD");
-
                 sectionMembers.push(newMember);
 
-                // Creating a new member
                 await updateDoc(doc(db, "management", props.section.id), {
                     name: props.section.name,
                     members: sectionMembers,
                 });
 
                 alert("Zauktualizowałeś sekcję!");
-                reset(); // Reset form fields after creation
+                reset();
             }
         } catch (error) {
             console.error("Wystąpił błąd:", error);
@@ -205,8 +189,8 @@ export const MemberForm = (props: IProps) => {
                         sx={{ mb: 3 }}
                         {...field}
                         onChange={(newFile) => {
-                            setFile(newFile as File); // Update state
-                            field.onChange(newFile); // Pass the files to react-hook-form
+                            setFile(newFile as File);
+                            field.onChange(newFile);
                         }}
                     />
                 )}

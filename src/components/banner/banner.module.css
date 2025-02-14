@@ -1,9 +1,9 @@
 .banner {
     width: 100%;
-    height: calc(100vh - 100px);
-    position: relative;
+    position: fixed;
     top: 100px;
     margin-bottom: 100px;
+    z-index: 1;
 }
 .subBanner {
     width: 100%;
