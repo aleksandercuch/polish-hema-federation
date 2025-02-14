@@ -13,13 +13,7 @@ import "./gallery.css";
 //FIREBASE
 import { deleteObject, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
-import {
-    collection,
-    deleteDoc,
-    doc,
-    getDocs,
-    updateDoc,
-} from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 
 // COMPONENTS
 import CreateSectionForm from "@/utils/forms/createSectionForm";
@@ -27,11 +21,7 @@ import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 import { Loader } from "../loader/loader";
 
 // TYPES
-import {
-    defaultSection,
-    memberParams,
-    sectionParams,
-} from "@/types/management.interface";
+import { defaultSection, sectionParams } from "@/types/management.interface";
 import { isStringArray } from "@/types/typeGuards/isArrayofStrings";
 
 // UTILS
@@ -75,12 +65,12 @@ const Gallery = () => {
             if (
                 section.members &&
                 section.members.length > 0 &&
-                isStringArray(section.members)
+                isStringArray(section.members as string[])
             ) {
                 await Promise.all(
                     section.members.map(async (member) => {
-                        if (await fileExists(member)) {
-                            await deleteObject(ref(storage, member));
+                        if (await fileExists(member as string)) {
+                            await deleteObject(ref(storage, member as string));
                         }
                     })
                 );
@@ -107,9 +97,9 @@ const Gallery = () => {
             .then((querySnapshot) => {
                 const dataArray = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
-                    ...doc.data(), // Spread the document data
-                })); // @ts-ignore
-                setSectionsList(dataArray); // Logs the collection as an array
+                    ...doc.data(),
+                })); // @ts-expect-error
+                setSectionsList(dataArray);
             })
             .catch((error) => {
                 console.error("Error retrieving collection: ", error);

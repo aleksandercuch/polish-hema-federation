@@ -10,7 +10,6 @@ import {
     Button,
     FormControl,
     Grid,
-    Paper,
     Typography,
     TextField,
 } from "@mui/material";
@@ -24,23 +23,14 @@ import {
     uploadBytes,
 } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
-import {
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDocs,
-    updateDoc,
-} from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 
 // COMPONENTS
-import { SubPageBanner } from "@/components/banner/SubPageBanner";
 import { addRandomSuffix } from "@/utils/post/addRandomSuffix";
 import { DEFAULT_AVATAR } from "@/utils/constants/constants";
 
 // TYPES
 import { contactParams } from "@/types/management.interface";
-import { fileExists } from "@/utils/storage/fileExistInStorage";
 
 interface IProps {
     closeForm: () => void;
@@ -65,7 +55,7 @@ const ContactForm = (props: IProps) => {
             descriptionENG: props.contact?.descriptionENG || "",
             phone: props.contact?.phone || "",
             email: props.contact?.email || "",
-            file: null,
+            file: "",
         },
     });
 
@@ -82,18 +72,15 @@ const ContactForm = (props: IProps) => {
         try {
             let downloadURL = "";
 
-            // If a new file is uploaded
-            if (data?.file?.name) {
+            if (data?.file instanceof File) {
                 const fileName = `${props.storageHref}/${addRandomSuffix(
                     data.file.name
                 )}`;
                 const storageRef = ref(storage, fileName);
 
-                // Upload new image
                 const snapshot = await uploadBytes(storageRef, data.file);
                 downloadURL = await getDownloadURL(snapshot.ref);
 
-                // Delete old image if it exists and is stored in Firebase
                 if (
                     contactToEdition?.file &&
                     typeof contactToEdition.file === "string" &&
@@ -171,7 +158,7 @@ const ContactForm = (props: IProps) => {
                     file instanceof File
                         ? URL.createObjectURL(file)
                         : props.contact
-                        ? props.contact.file
+                        ? (props.contact.file as string)
                         : DEFAULT_AVATAR
                 }
                 sx={{
@@ -185,6 +172,7 @@ const ContactForm = (props: IProps) => {
                 name={"file"}
                 control={control}
                 render={({ field }) => (
+                    // @ts-expect-error
                     <MuiFileInput
                         inputProps={{
                             accept: ".png, .jpeg, .jpg",
@@ -192,8 +180,8 @@ const ContactForm = (props: IProps) => {
                         sx={{ mb: 3 }}
                         {...field}
                         onChange={(newFile) => {
-                            setFile(newFile as File); // Update state
-                            field.onChange(newFile); // Pass the files to react-hook-form
+                            setFile(newFile as File);
+                            field.onChange(newFile);
                         }}
                     />
                 )}

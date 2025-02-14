@@ -1,15 +1,20 @@
 // CORE
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { convertFromRaw, EditorState, convertToRaw } from "draft-js";
+import {
+    convertFromRaw,
+    EditorState,
+    convertToRaw,
+    RawDraftContentState,
+} from "draft-js";
 
 // CONTEXT
 import { UserAuth } from "@/contexts/AuthContext";
 
 // ASSTES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { Button, FormControl, Grid, Paper, Typography } from "@mui/material";
+import { Button, FormControl, Grid, Typography } from "@mui/material";
 
 //FIREBASE
 import { db } from "../../../firebase/config/clientApp";
@@ -20,7 +25,7 @@ import { Editor } from "@/utils/editor/editorImport";
 import { convertDraftToHtmlWithEmptyBlocks } from "@/utils/editor/convertFunction";
 
 interface editorParams {
-    descriptionPL: any;
+    descriptionPL: string | RawDraftContentState;
     descriptionENG: any;
 }
 
@@ -68,49 +73,50 @@ const TextEditorComponent = (props: pageParams) => {
             });
     };
 
-    const fetchEditor = async () => {
+    const fetchEditor = useCallback(async () => {
         const collectionRef = collection(db, props.collectionName);
         const docRef = doc(collectionRef, props.collectionId);
 
-        getDoc(docRef)
-            .then((docSnapshot) => {
-                if (docSnapshot.exists()) {
-                    const data = docSnapshot.data();
-                    setElements({
-                        descriptionPL: data.descriptionPL,
-                        descriptionENG: data.descriptionENG,
-                    });
-                } else {
-                    alert("Coś poszło nie tak!");
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    };
+        try {
+            const docSnapshot = await getDoc(docRef);
+            if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
+                setElements({
+                    descriptionPL: data.descriptionPL,
+                    descriptionENG: data.descriptionENG,
+                });
+            } else {
+                alert("Coś poszło nie tak!");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }, [props.collectionName, props.collectionId]);
 
-    const fetchToEditor = async () => {
+    const fetchToEditor = useCallback(() => {
+        if (!elements) return;
+
         setEditorStatePL(
             EditorState.createWithContent(
-                convertFromRaw(elements?.descriptionPL)
+                convertFromRaw(elements.descriptionPL as RawDraftContentState)
             )
         );
         setEditorStateENG(
             EditorState.createWithContent(
-                convertFromRaw(elements?.descriptionENG)
+                convertFromRaw(elements.descriptionENG)
             )
         );
-    };
+    }, [elements]);
 
     useEffect(() => {
         if (isEditing) {
             fetchToEditor();
         }
-    }, [isEditing]);
+    }, [isEditing, fetchToEditor]);
 
     useEffect(() => {
         fetchEditor();
-    }, []);
+    }, [fetchEditor]);
     return (
         <>
             {currentUser?.user?.email && (
@@ -221,7 +227,7 @@ const TextEditorComponent = (props: pageParams) => {
                     style={{ padding: "0 5px" }}
                     dangerouslySetInnerHTML={{
                         __html: convertDraftToHtmlWithEmptyBlocks(
-                            elements.descriptionPL
+                            elements.descriptionPL as RawDraftContentState
                         ),
                     }}
                 />

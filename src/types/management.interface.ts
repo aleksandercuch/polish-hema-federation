@@ -1,8 +1,10 @@
+import { RawDraftContentState } from "react-draft-wysiwyg";
+
 export interface memberParams {
     name: string;
     descriptionENG: string;
     descriptionPL: string;
-    file: any;
+    file: string | File;
     id: number;
 }
 
@@ -11,15 +13,15 @@ export interface contactParams {
     name: string;
     descriptionENG: string;
     descriptionPL: string;
-    file: any;
+    file: string | File;
     phone: string;
     email: string;
 }
 
 export interface requestSectionParams {
     name: string;
-    descriptionEng?: any;
-    descriptionPl?: any;
+    descriptionEng?: string | RawDraftContentState;
+    descriptionPl?: string | RawDraftContentState;
     members: memberParams[] | string[];
 }
 export interface sectionParams extends requestSectionParams {
