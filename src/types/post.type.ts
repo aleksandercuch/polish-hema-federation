@@ -10,6 +10,6 @@ export type PostT = {
     descriptionENG: string | RawDraftContentState;
     descriptionPL: string | RawDraftContentState;
     mainFile: string | File;
-    date: Timestamp;
+    date: Timestamp | Date;
     images: File[] | string[];
 };

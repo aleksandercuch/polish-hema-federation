@@ -10,5 +10,5 @@ export const defaultPostValues = {
     descriptionPL: "",
     mainFile: "",
     images: [],
-    date: Timestamp,
+    date: new Date(),
 };
