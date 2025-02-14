@@ -126,7 +126,7 @@ export const ResponsiveAppBar = () => {
             position="fixed"
             sx={{ backgroundColor: "white", color: "black" }}
         >
-            <Container maxWidth="false">
+            <Container maxWidth={false}>
                 <Toolbar disableGutters>
                     <Link href="/">
                         <Image

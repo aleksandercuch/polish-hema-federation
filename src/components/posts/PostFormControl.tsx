@@ -125,7 +125,7 @@ const PostFormControl = (props: IProps) => {
                 ? newMainFile
                 : existingMainFileUrl;
         },
-        [storage]
+        []
     );
 
     const handleImageUploads = useCallback(async (): Promise<string[]> => {
@@ -161,7 +161,7 @@ const PostFormControl = (props: IProps) => {
         );
 
         return keptUrls.concat(newImageUrls);
-    }, [uploadedFiles, post.images, storage]);
+    }, [uploadedFiles, post.images]);
 
     const submitForm = useCallback(
         async (data: PostT) => {
@@ -210,7 +210,7 @@ const PostFormControl = (props: IProps) => {
                 setLoading(false);
             }
         },
-        [post, handleMainFileUpload, handleImageUploads, setLoading]
+        [post, handleMainFileUpload, handleImageUploads, setLoading, props.mode]
     );
 
     useEffect(() => {
