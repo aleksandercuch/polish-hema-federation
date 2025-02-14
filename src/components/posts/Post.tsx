@@ -34,7 +34,7 @@ import { convertDraftToHtmlWithEmptyBlocks } from "@/utils/editor/convertFunctio
 import { convertImagesToGallery } from "@/utils/post/convertImagesToGallery";
 import { convertFirebaseTimestamp } from "@/utils/post/convertFirebaseTimestamp";
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
-import { defaultPostValues } from "@/utils/post/postDefaultValues";
+//import { defaultPostValues } from "@/utils/post/postDefaultValues";
 import { fileExists } from "@/utils/storage/fileExistInStorage";
 
 //CONTEXT
