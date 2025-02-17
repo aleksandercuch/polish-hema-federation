@@ -116,6 +116,7 @@ const ListOfPosts = () => {
                         xs: "100%",
                         lg: "55%",
                     },
+                    backgroundColor: "rgba(255, 0, 0, 0.5)",
                 }}
             >
                 <Paper
@@ -125,7 +126,6 @@ const ListOfPosts = () => {
                     <Grid
                         container
                         direction="column"
-                        spacing={8}
                         sx={{
                             justifyContent: "flex-start",
                             alignItems: "flex-start",

@@ -145,6 +145,7 @@ const Post = () => {
                         xs: "100%",
                         lg: "55%",
                     },
+                    backgroundColor: "rgba(255, 0, 0, 0.5)",
                 }}
             >
                 <Paper>

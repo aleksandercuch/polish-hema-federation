@@ -232,11 +232,7 @@ const Gallery = () => {
                                         </Grid>
                                     )}
                                     {section.members.length > 0 && (
-                                        <Grid
-                                            item
-                                            xs={12}
-                                            className={styles.galleryContainer}
-                                        >
+                                        <Grid item xs={12}>
                                             <ImageGallery
                                                 items={convertImagesToGallery(
                                                     section.members as string[]

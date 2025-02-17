@@ -88,7 +88,11 @@ export const NewsHome = () => {
                             : 6
                     }
                     sx={{
-                        maxHeight: posts.length == 5 ? "240px" : "30vh",
+                        maxHeight: {
+                            md: `${posts.length == 5 ? "240px" : "30vh"}`,
+                            xs: `${posts.length == 5 ? "240px" : "60vh"}`,
+                        },
+                        display: { xs: "none", sm: "block" },
                     }}
                     key={post.id}
                 >

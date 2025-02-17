@@ -72,10 +72,28 @@ export const Schedule = () => {
     }, []);
 
     return (
-        <Card className={styles.schedule}>
+        <Card
+            className={styles.schedule}
+            sx={{
+                display: { xs: "block", sm: "flex" },
+                flexDirection: "row",
+                flex: "100% 100%",
+            }}
+        >
+            <CardMedia
+                component="img"
+                image={
+                    "https://historicalmartialarts.eu/wp-content/uploads/2022/12/K_HemaEventCalendar.jpg"
+                }
+                alt="Post picture error"
+                sx={{
+                    width: { sm: "50%", xs: "100%" },
+                    border: "30px solid #d32f2f",
+                }}
+            />
             <Box
                 sx={{
-                    width: "50%",
+                    width: { sm: "50%", xs: "100%" },
                     alignContent: "center",
                     backgroundColor: "white",
                 }}
@@ -133,17 +151,6 @@ export const Schedule = () => {
                     </Grid>
                 </CardContent>
             </Box>
-            <CardMedia
-                component="img"
-                image={
-                    "https://historicalmartialarts.eu/wp-content/uploads/2022/12/K_HemaEventCalendar.jpg"
-                }
-                alt="Post picture error"
-                sx={{
-                    width: "50%",
-                    border: "30px solid #d32f2f",
-                }}
-            />
         </Card>
     );
 };

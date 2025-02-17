@@ -3,6 +3,7 @@ import "./globals.css";
 import { PostsProvider } from "@/contexts/PostsContext";
 import { AuthContextProvider } from "@/contexts/AuthContext";
 import { ResponsiveAppBar } from "@/components/navbar/Navbar";
+import Footer from "@/components/footer/Footer";
 
 export const metadata: Metadata = {
     title: "Polish Hema Federation",
@@ -22,6 +23,7 @@ export default function RootLayout({
                         <div>
                             <ResponsiveAppBar />
                             {children}
+                            <Footer />
                         </div>
                     </PostsProvider>
                 </AuthContextProvider>

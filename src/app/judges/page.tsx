@@ -1,5 +1,5 @@
 "use client";
-import { Grid, Paper, Typography } from "@mui/material";
+import { Divider, Grid, Paper, Typography } from "@mui/material";
 
 // COMPONENTS
 import { SubPageBanner } from "@/components/banner/SubPageBanner";
@@ -10,6 +10,25 @@ const page = () => {
     return (
         <Grid container className={styles.mainContainer} xs={12}>
             <SubPageBanner />
+            <Grid
+                item
+                xs={12}
+                sx={{
+                    textAlign: "center",
+                    width: "100%",
+                    backgroundColor: "#d32f2f",
+                    position: "relative",
+                    top: "35vh",
+                }}
+            >
+                <Typography
+                    variant="h3"
+                    sx={{ padding: "30px 0", color: "white" }}
+                >
+                    Judges
+                </Typography>
+                <Divider />
+            </Grid>
             <Paper className={styles.subpageContainer}>
                 <Grid
                     container
@@ -20,13 +39,9 @@ const page = () => {
                         maxWidth: "none",
                         padding: "0 5px",
                     }}
-                    spacing={8}
                     xs={12}
                 >
-                    <Grid item xs={12} sx={{ textAlign: "center" }}>
-                        <Typography variant="h3">Judges</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} sm={8} mt={4}>
                         <TextEditorComponent
                             collectionName="judges"
                             collectionId="5MhxZbiqHBODQRnlE63j"
