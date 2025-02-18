@@ -1,7 +1,4 @@
 .schedule {
-    display: flex;
-    flex-direction: row-reverse;
-    flex: 50% 50%;
     text-align: center;
     height: 100%;
     z-index: 2;

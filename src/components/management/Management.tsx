@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { Avatar, Button, Grid, Paper, Typography } from "@mui/material";
+import {
+    Avatar,
+    Button,
+    Divider,
+    Grid,
+    Paper,
+    Typography,
+} from "@mui/material";
 import styles from "@/app/subpage.module.css";
 
 //FIREBASE
@@ -159,6 +166,25 @@ const Management = () => {
     return (
         <Grid container className={styles.mainContainer} xs={12}>
             <SubPageBanner />
+            <Grid
+                item
+                xs={12}
+                sx={{
+                    textAlign: "center",
+                    width: "100%",
+                    backgroundColor: "#d32f2f",
+                    position: "relative",
+                    top: "35vh",
+                }}
+            >
+                <Typography
+                    variant="h3"
+                    sx={{ padding: "30px 0", color: "white" }}
+                >
+                    Władze
+                </Typography>
+                <Divider />
+            </Grid>
             <Paper className={styles.subpageContainer}>
                 <Grid
                     container
@@ -169,12 +195,8 @@ const Management = () => {
                         maxWidth: "none",
                         padding: "0 5px",
                     }}
-                    spacing={8}
                     xs={12}
                 >
-                    <Grid item xs={12} sx={{ textAlign: "center" }}>
-                        <Typography variant="h3">Władze</Typography>
-                    </Grid>
                     {loading || sectionsList.length <= 0 ? (
                         <Grid item>
                             <Loader />

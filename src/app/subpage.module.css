@@ -1,11 +1,9 @@
 .mainContainer {
-    position: absolute;
     justify-content: center;
 }
 
 .subpageBackground {
     z-index: 10;
-    background-color: rgba(255, 0, 0, 0.5);
     position: relative;
     top: 35vh;
 }
@@ -16,8 +14,7 @@
 }
 
 .subpageContainer {
-    position: relative;
-    top: 35vh;
+    margin-top: 35vh;
     z-index: 10;
     width: 100%;
     padding: 50px 0;
