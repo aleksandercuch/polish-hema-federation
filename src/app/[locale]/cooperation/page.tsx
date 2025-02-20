@@ -1,12 +1,16 @@
 "use client";
 import { Divider, Grid, Paper, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 // COMPONENTS
 import { SubPageBanner } from "@/components/banner/SubPageBanner";
-import styles from "@/app/subpage.module.css";
+import styles from "@/app/[locale]/subpage.module.css";
 import TextEditorComponent from "@/components/SingePageText/TextEditor";
+import Contact from "@/components/contact/Contact";
 
 const page = () => {
+    const t = useTranslations("NAVBAR");
+
     return (
         <Grid container className={styles.mainContainer} xs={12}>
             <SubPageBanner />
@@ -25,7 +29,7 @@ const page = () => {
                     variant="h3"
                     sx={{ padding: "30px 0", color: "white" }}
                 >
-                    Judges
+                    {t("judges")}
                 </Typography>
                 <Divider />
             </Grid>
@@ -41,10 +45,17 @@ const page = () => {
                     }}
                     xs={12}
                 >
+                    <Contact
+                        storageHref="cooperationImages"
+                        collectionName="cooperationContact"
+                    />
+                    <Grid item xs={12}>
+                        <Divider />
+                    </Grid>
                     <Grid item xs={12} sm={8} mt={4}>
                         <TextEditorComponent
-                            collectionName="judges"
-                            collectionId="5MhxZbiqHBODQRnlE63j"
+                            collectionName="cooperation"
+                            collectionId="MgjzyLQzaSOhPxrF6hjd"
                         />{" "}
                     </Grid>
                 </Grid>

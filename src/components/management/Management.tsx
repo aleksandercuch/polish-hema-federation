@@ -1,6 +1,7 @@
 // CORE
 "use client";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
@@ -12,7 +13,7 @@ import {
     Paper,
     Typography,
 } from "@mui/material";
-import styles from "@/app/subpage.module.css";
+import styles from "@/app/[locale]/subpage.module.css";
 
 //FIREBASE
 import { deleteObject, ref } from "firebase/storage";
@@ -58,7 +59,7 @@ const Management = () => {
     const [mode, setMode] = useState<OPERATION_MODE>(OPERATION_MODE.None);
     const [loading, setLoading] = useState(false);
     const currentUser = UserAuth();
-
+    const t = useTranslations("NAVBAR");
     const handleDeleteMember = async (
         section: sectionParams,
         member: memberParams
@@ -181,7 +182,7 @@ const Management = () => {
                     variant="h3"
                     sx={{ padding: "30px 0", color: "white" }}
                 >
-                    Władze
+                    {t("management")}
                 </Typography>
                 <Divider />
             </Grid>
@@ -472,7 +473,8 @@ const Management = () => {
                                             <Button
                                                 fullWidth
                                                 type="submit"
-                                                variant="contained"
+                                                variant="outlined"
+                                                color="error"
                                                 size="small"
                                                 sx={{ mb: 2 }}
                                                 onClick={() =>

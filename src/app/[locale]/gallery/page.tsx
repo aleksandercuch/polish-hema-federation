@@ -1,12 +1,15 @@
 "use client";
-import { Divider, Grid, Paper, Typography } from "@mui/material";
 
-// COMPONENTS
+import { useTranslations } from "next-intl";
 import { SubPageBanner } from "@/components/banner/SubPageBanner";
-import styles from "@/app/subpage.module.css";
-import TextEditorComponent from "@/components/SingePageText/TextEditor";
+// COMPONENTS
+import { Divider, Grid, Paper, Typography } from "@mui/material";
+import styles from "@/app/[locale]/subpage.module.css";
+import Gallery from "@/components/gallery/Gallery";
 
 const page = () => {
+    const t = useTranslations("NAVBAR");
+
     return (
         <Grid container className={styles.mainContainer} xs={12}>
             <SubPageBanner />
@@ -25,7 +28,7 @@ const page = () => {
                     variant="h3"
                     sx={{ padding: "30px 0", color: "white" }}
                 >
-                    Regulamin
+                    {t("gallery")}
                 </Typography>
                 <Divider />
             </Grid>
@@ -41,12 +44,7 @@ const page = () => {
                     }}
                     xs={12}
                 >
-                    <Grid item xs={12} sm={8} mt={4}>
-                        <TextEditorComponent
-                            collectionName="rules"
-                            collectionId="Jln6vLueJh7byiux8FsW"
-                        />
-                    </Grid>
+                    <Gallery />
                 </Grid>
             </Paper>
         </Grid>

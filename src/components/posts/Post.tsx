@@ -3,10 +3,11 @@
 // CORE
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import styles from "@/app/subpage.module.css";
+import styles from "@/app/[locale]/subpage.module.css";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 // CONTEXT
 import { usePost } from "@/contexts/PostsContext";
@@ -48,6 +49,8 @@ const Post = () => {
     const [isEditing, setIsEditing] = useState(false);
     const router = useRouter();
     const currentUser = UserAuth();
+    const t = useTranslations("COMMON");
+    const currentLocale = window.location.pathname.split("/")[1];
 
     const deletePost = async () => {
         if (!post?.id) return;
@@ -149,8 +152,8 @@ const Post = () => {
                 }}
             >
                 <Paper>
-                    <Link href={"/posts"}>
-                        <Button>Wszystkie posty</Button>
+                    <Link href={`/${currentLocale}/posts`}>
+                        <Button>{t("show-all-posts")}</Button>
                     </Link>
                 </Paper>
                 <Paper
@@ -181,7 +184,9 @@ const Post = () => {
                                     >
                                         <Grid item>
                                             <Typography variant="h3">
-                                                {post.titlePL}
+                                                {currentLocale == "pl"
+                                                    ? post.titlePL
+                                                    : post.titleENG}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
@@ -246,7 +251,9 @@ const Post = () => {
                                             <div
                                                 dangerouslySetInnerHTML={{
                                                     __html: convertDraftToHtmlWithEmptyBlocks(
-                                                        post.descriptionPL as RawDraftContentState
+                                                        currentLocale == "pl"
+                                                            ? (post.descriptionPL as RawDraftContentState)
+                                                            : (post.descriptionENG as RawDraftContentState)
                                                     ),
                                                 }}
                                             />

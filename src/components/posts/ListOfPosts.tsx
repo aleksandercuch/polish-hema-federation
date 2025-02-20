@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import styles from "@/app/subpage.module.css";
+import styles from "@/app/[locale]/subpage.module.css";
 import { PostT } from "@/types/post.type";
 import { usePost } from "@/contexts/PostsContext";
 import {
@@ -29,6 +29,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../firebase/config/clientApp";
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
+import { useTranslations } from "next-intl";
 
 //CONTEXT
 import { UserAuth } from "@/contexts/AuthContext";
@@ -44,6 +45,7 @@ const ListOfPosts = () => {
     const { setPost } = usePost();
     const router = useRouter();
     const currentUser = UserAuth();
+    const t = useTranslations("COMMON");
 
     const fetchPosts = useCallback(
         async (reset = false) => {
@@ -142,7 +144,9 @@ const ListOfPosts = () => {
                             }}
                         >
                             <Grid item>
-                                <Typography variant="h3">Posty</Typography>
+                                <Typography variant="h3">
+                                    {t("posts")}
+                                </Typography>
                             </Grid>
                             {!addPostModeActive && currentUser?.user?.email && (
                                 <Grid item>
@@ -244,8 +248,9 @@ const ListOfPosts = () => {
                                                                                 )
                                                                             }
                                                                         >
-                                                                            Show
-                                                                            More
+                                                                            {t(
+                                                                                "show-more"
+                                                                            )}
                                                                         </Button>
                                                                     </Grid>
                                                                 </Grid>

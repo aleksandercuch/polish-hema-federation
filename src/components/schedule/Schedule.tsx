@@ -3,6 +3,7 @@
 // CORE
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
+import { useTranslations } from "next-intl";
 
 // ASSETS
 import Card from "@mui/material/Card";
@@ -31,6 +32,7 @@ export const Schedule = () => {
     const [editMode, setEditMode] = useState(false);
     const [schedule, setSchedule] = useState<string>();
     const currentUser = UserAuth();
+    const t = useTranslations("COMMON");
 
     const fetchSchedule = async () => {
         try {
@@ -107,7 +109,7 @@ export const Schedule = () => {
                     >
                         <Grid item>
                             <Typography component="div" variant="h5">
-                                Harmonogram Zawodów{" "}
+                                {t("schedule")}{" "}
                                 {dayjs(new Date()).format("YYYY")}
                             </Typography>
                         </Grid>
@@ -140,7 +142,7 @@ export const Schedule = () => {
                                                 downloadSchedule(schedule)
                                             }
                                         >
-                                            Pokaż Harmonogram
+                                            {t("show-schedule")}
                                         </Button>
                                     </Grid>
                                 )}

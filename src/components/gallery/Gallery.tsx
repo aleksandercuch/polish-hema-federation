@@ -6,9 +6,7 @@ import { useEffect, useState } from "react";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Button, Grid, Typography } from "@mui/material";
 import ImageGallery from "react-image-gallery";
-import styles from "@/app/subpage.module.css";
 import "react-image-gallery/styles/css/image-gallery.css";
-import "./gallery.css";
 
 //FIREBASE
 import { deleteObject, ref } from "firebase/storage";
@@ -61,7 +59,6 @@ const Gallery = () => {
         if (!confirmDelete) return;
         setLoading(true);
         try {
-            // Delete images if they exist
             if (
                 section.members &&
                 section.members.length > 0 &&
@@ -254,8 +251,9 @@ const Gallery = () => {
                                     <Button
                                         fullWidth
                                         type="submit"
-                                        variant="contained"
+                                        variant="outlined"
                                         size="small"
+                                        color="error"
                                         sx={{ mb: 2 }}
                                         onClick={() =>
                                             setMode(OPERATION_MODE.Add)
