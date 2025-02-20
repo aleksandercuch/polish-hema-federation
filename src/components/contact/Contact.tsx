@@ -1,126 +1,68 @@
 // CORE
 "use client";
-import { ComponentType, FC, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { convertFromRaw, EditorState, RawDraftContentState } from "draft-js";
-//import { UserAuth } from "@/context/auth-context";
-import dynamic from "next/dynamic";
-import { EditorProps } from "react-draft-wysiwyg";
+import { useCallback, useEffect, useState } from "react";
+
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import {
-    Avatar,
-    Button,
-    FormControl,
-    Grid,
-    Paper,
-    Typography,
-    TextField,
-} from "@mui/material";
-import styles from "@/app/subpage.module.css";
+import { Avatar, Button, Grid, Typography } from "@mui/material";
 import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
 import EmailIcon from "@mui/icons-material/Email";
-import { MuiFileInput } from "mui-file-input";
-
-// @ts-ignore
-import draftToHtml from "draftjs-to-html";
 
 //FIREBASE
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { deleteObject, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
-import {
-    addDoc,
-    collection,
-    doc,
-    getDocs,
-    updateDoc,
-} from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 
-// COMPONENTS
-import { SubPageBanner } from "@/components/banner/SubPageBanner";
+// UTILS
 
-interface contactParams {
-    id: string;
-    name: string;
-    descriptionENG: string;
-    descriptionPL: string;
-    file: any;
-    phone: string;
-    email: string;
-    image: string;
+import { DEFAULT_AVATAR } from "@/utils/constants/constants";
+import ContactForm from "@/utils/forms/contactForm";
+
+// TYPES
+import { contactParams, defaultContact } from "@/types/management.interface";
+import { fileExists } from "@/utils/storage/fileExistInStorage";
+import { Loader } from "../loader/loader";
+
+//CONTEXT
+import { UserAuth } from "@/contexts/AuthContext";
+interface IProps {
+    storageHref: string;
+    collectionName: string;
 }
 
-const Contact = () => {
+const Contact = (props: IProps) => {
     const [contactList, setContactList] = useState<contactParams[]>([]);
-    const [contactToEdition, setContactToEdition] = useState<contactParams>();
-
+    const [contactToEdition, setContactToEdition] =
+        useState<contactParams>(defaultContact);
+    const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
+    const currentLocale = window.location.pathname.split("/")[1];
+    const currentUser = UserAuth();
 
-    const form = useForm<contactParams>({
-        defaultValues: {
-            name: "",
-            descriptionENG: "",
-            descriptionPL: "",
-            phone: "",
-            email: "",
-            file: undefined,
-        },
-    });
+    const deleteContact = async (data: contactParams) => {
+        if (!data.file) return;
+        else {
+            const confirmDelete = window.confirm(
+                "Czy na pewno chcesz usunąć ten kontakt?"
+            );
+            if (!confirmDelete) return;
 
-    const {
-        control,
-        handleSubmit,
-        reset,
-        formState: { isSubmitting, errors, isValid, isSubmitted },
-    } = form;
+            setLoading(true);
 
-    const submitForm = (data: contactParams) => {
-        if (contactToEdition) {
-            const storageRef = ref(storage, `postsImages/${data.file.name}`);
-            uploadBytes(storageRef, data.file).then(async (snapshot) => {
-                const downloadURL = await getDownloadURL(snapshot.ref);
-                updateDoc(doc(db, "contact", contactToEdition.id), {
-                    descriptionPL: data.descriptionPL,
-                    descriptionENG: data.descriptionENG,
-                    name: data.name,
-                    phone: data.phone,
-                    email: data.email,
-                    file: downloadURL,
-                })
-                    .then(() => {
-                        alert(`Zakończyłeś edycję ${data.name}!`);
-                        setContactToEdition(undefined);
-                        setIsEditing(false);
-                        //  fetchRules();
-                    })
-                    .catch((error) => {
-                        alert(error);
-                    });
-            });
-        } else {
-            const storageRef = ref(storage, `contactImages/${data.file.name}`);
-
-            uploadBytes(storageRef, data.file)
-                .then(async (snapshot) => {
-                    const downloadURL = await getDownloadURL(snapshot.ref);
-                    addDoc(collection(db, "contact"), {
-                        descriptionPL: data.descriptionPL,
-                        descriptionENG: data.descriptionENG,
-                        name: data.name,
-                        phone: data.phone,
-                        email: data.email,
-                        file: downloadURL,
-                    }).then(() => {
-                        alert("Stworzyłeś nowy kontakt!");
-                        setContactToEdition(undefined);
-                        setIsEditing(false);
-                        reset();
-                    });
-                })
-                .catch((error) => {
-                    alert(error);
-                });
+            if (await fileExists(data.file as string)) {
+                await deleteObject(ref(storage, data.file as string)).then(
+                    () => {
+                        deleteDoc(doc(db, props.collectionName, data.id)).then(
+                            () => {
+                                fetchContact().then(() => setLoading(false));
+                            }
+                        );
+                    }
+                );
+            } else {
+                setLoading(false);
+            }
         }
     };
 
@@ -130,132 +72,162 @@ const Contact = () => {
     };
 
     const closeAdminPanel = () => {
-        contactToEdition && setContactToEdition(undefined);
+        setContactToEdition(defaultContact);
         setIsAdding(false);
         setIsEditing(false);
     };
 
-    const fetchContact = async () => {
-        const contactCollection = collection(db, "contact");
-
-        getDocs(contactCollection)
-            .then((querySnapshot) => {
-                const dataArray = querySnapshot.docs.map((doc) => ({
-                    id: doc.data().id,
-                    ...doc.data(), // Spread the document data
-                }));
-                setContactList(dataArray); // Logs the collection as an array
-            })
-            .catch((error) => {
-                console.error("Error retrieving collection: ", error);
-            });
-    };
+    const fetchContact = useCallback(async () => {
+        setLoading(true);
+        try {
+            const contactCollection = collection(db, props.collectionName);
+            const querySnapshot = await getDocs(contactCollection);
+            const dataArray = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })); // @ts-expect-error: temporary solution: temporary solution
+            setContactList(dataArray);
+        } catch (error) {
+            console.error("Error retrieving collection: ", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [props.collectionName]);
 
     useEffect(() => {
         fetchContact();
-    }, []);
+    }, [fetchContact]);
+
     return (
-        <Grid container className={styles.mainContainer} xs={12}>
-            <SubPageBanner />
-            <Paper className={styles.subpageContainer}>
-                <Grid
-                    container
-                    direction="row"
-                    sx={{
-                        justifyContent: "center",
-                        alignItems: "center",
-                        maxWidth: "none",
-                        padding: "0 5px",
-                    }}
-                    spacing={8}
-                    xs={12}
-                >
-                    <Grid item xs={12} sx={{ textAlign: "center" }}>
-                        <Typography variant="h3">Kontakt</Typography>
-                    </Grid>
-                    <Grid
-                        item
-                        container
-                        xs={12}
-                        sm={8}
-                        spacing={4}
-                        sx={{ justifyContent: "center" }}
-                    >
-                        {!isAdding && !isEditing && contactList.length ? (
-                            <>
-                                {contactList.map((element) => (
+        <Grid
+            item
+            container
+            xs={12}
+            sm={8}
+            spacing={4}
+            sx={{ justifyContent: "center" }}
+        >
+            {loading ? (
+                <Grid item>
+                    <Loader />
+                </Grid>
+            ) : (
+                <>
+                    {!isAdding && !isEditing ? (
+                        <>
+                            {contactList.map((element) => (
+                                <Grid
+                                    item
+                                    key={element.id}
+                                    container
+                                    xs={12}
+                                    md={6}
+                                    sx={{
+                                        paddingBottom: "40px",
+                                        textAlign: {
+                                            xs: "center",
+                                            sm: "left",
+                                        },
+                                    }}
+                                    spacing={2}
+                                >
+                                    <Grid item xs={12} lg={4}>
+                                        <Avatar
+                                            alt="Remy Sharp"
+                                            src={
+                                                (element.file as string) ||
+                                                DEFAULT_AVATAR
+                                            }
+                                            sx={{
+                                                width: 120,
+                                                height: 120,
+                                                margin: "auto",
+                                            }}
+                                        />
+                                    </Grid>
                                     <Grid
                                         item
-                                        key={element.phone}
                                         container
                                         xs={12}
-                                        md={6}
+                                        lg={8}
+                                        spacing={2}
                                         sx={{
-                                            paddingBottom: "40px",
+                                            justifyContent: {
+                                                xs: "center",
+                                                lg: "flex-start",
+                                            },
+
                                             textAlign: {
                                                 xs: "center",
-                                                sm: "left",
+                                                lg: "left",
                                             },
                                         }}
-                                        spacing={2}
                                     >
-                                        <Grid item xs={12} lg={4}>
-                                            <Avatar
-                                                alt="Remy Sharp"
-                                                src={
-                                                    element.image ||
-                                                    "/static/images/avatar/1.jpg"
-                                                }
-                                                sx={{
-                                                    width: 156,
-                                                    height: 156,
-                                                    margin: "auto",
-                                                }}
-                                            />
+                                        <Grid item xs={12}>
+                                            <Typography
+                                                variant="h5"
+                                                component="h4"
+                                            >
+                                                {element.name}
+                                            </Typography>
                                         </Grid>
-                                        <Grid
-                                            item
-                                            container
-                                            xs={12}
-                                            lg={8}
-                                            spacing={2}
-                                        >
-                                            <Grid item xs={12}>
-                                                <Typography
-                                                    variant="h5"
-                                                    component="h4"
+                                        <Grid item>
+                                            <Typography variant="body1">
+                                                {currentLocale == "pl"
+                                                    ? element.descriptionPL
+                                                    : element.descriptionENG}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item container xs={12}>
+                                            <Grid item container xs={12} lg={6}>
+                                                <Grid item xs={1} lg={2}>
+                                                    <LocalPhoneIcon />
+                                                </Grid>
+                                                <Grid item xs={9}>
+                                                    <Typography variant="body1">
+                                                        {element.phone}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid
+                                                    item
+                                                    xs={1}
+                                                    lg={2}
+                                                    sx={{
+                                                        display: {
+                                                            xs: "inherit",
+                                                            lg: "none",
+                                                        },
+                                                    }}
                                                 >
-                                                    {element.name}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Typography variant="body1">
-                                                    {element.descriptionPL}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item container xs={12}>
-                                                <Grid item container xs={6}>
-                                                    <Grid item xs={2}>
-                                                        <LocalPhoneIcon />
-                                                    </Grid>
-                                                    <Grid item xs={10}>
-                                                        <Typography variant="body1">
-                                                            {element.phone}
-                                                        </Typography>
-                                                    </Grid>
+                                                    <LocalPhoneIcon />
                                                 </Grid>
-                                                <Grid item container xs={6}>
-                                                    <Grid item xs={2}>
-                                                        <EmailIcon />
-                                                    </Grid>
-                                                    <Grid item xs={10}>
-                                                        <Typography variant="body1">
-                                                            {element.email}
-                                                        </Typography>
-                                                    </Grid>
+                                            </Grid>
+                                            <Grid item container xs={12} lg={6}>
+                                                <Grid item xs={1} lg={2}>
+                                                    <EmailIcon />
+                                                </Grid>
+                                                <Grid item xs={9}>
+                                                    <Typography variant="body1">
+                                                        {element.email}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid
+                                                    item
+                                                    xs={1}
+                                                    lg={2}
+                                                    sx={{
+                                                        display: {
+                                                            xs: "inherit",
+                                                            lg: "none",
+                                                        },
+                                                    }}
+                                                >
+                                                    <EmailIcon />
                                                 </Grid>
                                             </Grid>
                                         </Grid>
+                                    </Grid>
+                                    {currentUser?.user?.email && (
                                         <Grid
                                             item
                                             container
@@ -263,22 +235,48 @@ const Contact = () => {
                                             sx={{
                                                 justifyContent: "center",
                                             }}
+                                            spacing={2}
                                         >
-                                            <Button
-                                                type="submit"
-                                                color="error"
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{ mb: 2, mt: 2 }}
-                                                onClick={() =>
-                                                    editContact(element)
-                                                }
-                                            >
-                                                Edytuj {element.name}
-                                            </Button>
+                                            <Grid item>
+                                                <Button
+                                                    type="submit"
+                                                    color="error"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{
+                                                        mb: 2,
+                                                        mt: 2,
+                                                    }}
+                                                    onClick={() =>
+                                                        editContact(element)
+                                                    }
+                                                >
+                                                    Edytuj {element.name}
+                                                </Button>
+                                            </Grid>
+                                            <Grid item>
+                                                {" "}
+                                                <Button
+                                                    type="submit"
+                                                    color="error"
+                                                    variant="contained"
+                                                    size="small"
+                                                    sx={{
+                                                        mb: 2,
+                                                        mt: 2,
+                                                    }}
+                                                    onClick={() =>
+                                                        deleteContact(element)
+                                                    }
+                                                >
+                                                    Usuń {element.name}
+                                                </Button>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                ))}
+                                    )}
+                                </Grid>
+                            ))}
+                            {currentUser?.user?.email && (
                                 <Grid
                                     item
                                     container
@@ -287,8 +285,9 @@ const Contact = () => {
                                 >
                                     <Button
                                         fullWidth
+                                        color="error"
                                         type="submit"
-                                        variant="contained"
+                                        variant="outlined"
                                         size="small"
                                         sx={{ mb: 2 }}
                                         onClick={() => setIsAdding(true)}
@@ -296,212 +295,22 @@ const Contact = () => {
                                         Dodaj nowy kontakt
                                     </Button>
                                 </Grid>
-                            </>
-                        ) : (
-                            <FormControl
-                                component={"form"}
-                                onSubmit={handleSubmit(submitForm)}
-                                disabled={isSubmitting}
-                            >
-                                {contactToEdition && (
-                                    <Typography variant="h4">
-                                        Edytujesz {contactToEdition.name}
-                                    </Typography>
-                                )}
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src={
-                                        contactToEdition
-                                            ? contactToEdition.file
-                                            : "/static/images/avatar/1.jpg"
-                                    }
-                                    sx={{
-                                        width: 156,
-                                        height: 156,
-                                        margin: "auto",
-                                        mb: "30px",
-                                    }}
-                                />
-                                <Controller
-                                    name={"file"}
-                                    control={control}
-                                    render={({ field }) => (
-                                        <MuiFileInput
-                                            inputProps={{
-                                                accept: ".png, .jpeg, .jpg",
-                                            }}
-                                            sx={{ mb: 3 }}
-                                            {...field}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name={"name"}
-                                    control={control}
-                                    rules={{
-                                        required: "Podaj imię!",
-                                    }}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Imię"
-                                            variant="outlined"
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.name
-                                                    : ""
-                                            }
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name={"descriptionPL"}
-                                    control={control}
-                                    rules={{
-                                        required: "Podaj opis!",
-                                    }}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Opis PL"
-                                            variant="outlined"
-                                            multiline
-                                            rows={3}
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.descriptionPL
-                                                    : ""
-                                            }
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name={"descriptionENG"}
-                                    control={control}
-                                    rules={{
-                                        required: "Podaj opis ENG",
-                                    }}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Opis ENG"
-                                            multiline
-                                            rows={3}
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.descriptionENG
-                                                    : ""
-                                            }
-                                            variant="outlined"
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name={"phone"}
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Telefon"
-                                            variant="outlined"
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.phone
-                                                    : ""
-                                            }
-                                            autoComplete="username"
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name={"email"}
-                                    control={control}
-                                    rules={{
-                                        required: "Podaj email!",
-                                    }}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Email"
-                                            variant="outlined"
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.email
-                                                    : ""
-                                            }
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Grid
-                                    container
-                                    direction="row"
-                                    spacing={1}
-                                    sx={{ mt: 5 }}
-                                >
-                                    <Grid item xs={6}>
-                                        <Button
-                                            fullWidth
-                                            type="submit"
-                                            variant="outlined"
-                                            size="small"
-                                            color="error"
-                                            disabled={isSubmitting}
-                                        >
-                                            Zapisz zmiany
-                                        </Button>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Button
-                                            fullWidth
-                                            variant="contained"
-                                            size="small"
-                                            color="error"
-                                            onClick={() => closeAdminPanel()}
-                                        >
-                                            Anuluj
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </FormControl>
-                        )}
-                    </Grid>
-                </Grid>
-            </Paper>
+                            )}
+                        </>
+                    ) : (
+                        <ContactForm
+                            contact={contactToEdition}
+                            closeForm={closeAdminPanel}
+                            fetchForm={fetchContact}
+                            storageHref={props.storageHref}
+                            collectionName={props.collectionName}
+                            setIsEditing={setIsEditing}
+                            setIsAdding={setIsAdding}
+                            setLoading={setLoading}
+                        />
+                    )}
+                </>
+            )}
         </Grid>
     );
 };

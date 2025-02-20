@@ -1,12 +1,15 @@
-export type Post = {
+import { RawDraftContentState } from "react-draft-wysiwyg";
+import { Timestamp } from "firebase/firestore";
+
+export type PostT = {
     id: string;
     titleENG: string;
     titlePL: string;
     introENG: string;
     introPL: string;
-    descriptionENG: any;
-    descriptionPL: any;
-    visible: boolean;
-    mainFile: any;
-    date: Date;
+    descriptionENG: string | RawDraftContentState;
+    descriptionPL: string | RawDraftContentState;
+    mainFile: string | File;
+    date: Timestamp | Date;
+    images: File[] | string[];
 };

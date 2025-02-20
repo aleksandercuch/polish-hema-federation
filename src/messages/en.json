@@ -1,0 +1,21 @@
+{
+    "NAVBAR": {
+        "news": "News",
+        "schedule": "Schedule",
+        "rules": "Rules",
+        "management": "Management",
+        "contact": "Contact",
+        "gallery": "Gallery",
+        "judges": "Judges",
+        "cooperation": "Cooperation",
+        "clubs": "Clubs"
+    },
+    "COMMON": {
+        "show-more": "Show More",
+        "show-all-posts": "Show All Posts",
+        "show-schedule": "Show Schedule",
+        "polish-clubs": "Polish Clubs",
+        "posts": "Posts",
+        "schedule": "HEMA Schedule"
+    }
+}

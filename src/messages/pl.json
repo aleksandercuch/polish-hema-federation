@@ -1,0 +1,21 @@
+{
+    "NAVBAR": {
+        "news": "Nowości",
+        "schedule": "Harmonogram",
+        "rules": "Regulamin",
+        "management": "Władze",
+        "contact": "Kontakt",
+        "gallery": "Galeria",
+        "judges": "Sędziowie",
+        "cooperation": "Współpraca",
+        "clubs": "Kluby"
+    },
+    "COMMON": {
+        "show-more": "Pokaż więcej",
+        "show-all-posts": "Wszystkie Posty",
+        "show-schedule": "Pokaż Harmonogram",
+        "polish-clubs": "Kluby w Polsce",
+        "posts": "Posty",
+        "schedule": "Harmonogram Zawodów"
+    }
+}
