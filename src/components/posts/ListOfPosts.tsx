@@ -14,6 +14,7 @@ import {
     CardContent,
     Card,
     Box,
+    Divider,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { Loader } from "../loader/loader";
@@ -46,7 +47,7 @@ const ListOfPosts = () => {
     const router = useRouter();
     const currentUser = UserAuth();
     const t = useTranslations("COMMON");
-
+    const currentLocale = window.location.pathname.split("/")[1];
     const fetchPosts = useCallback(
         async (reset = false) => {
             setLoading(true);
@@ -94,7 +95,7 @@ const ListOfPosts = () => {
 
     const handleNavigation = (post: PostT) => {
         setPost(post);
-        router.push(`/posts/${post.id}`);
+        router.push(`/${currentLocale}/posts/${post.id}`);
     };
 
     useEffect(() => {
@@ -173,7 +174,10 @@ const ListOfPosts = () => {
                                                 item
                                                 key={index}
                                                 xs={12}
-                                                sx={{ width: "100%" }}
+                                                sx={{
+                                                    width: "100%",
+                                                    marginBottom: "15px",
+                                                }}
                                             >
                                                 <Card
                                                     sx={{
@@ -271,6 +275,7 @@ const ListOfPosts = () => {
                                                         }}
                                                     />
                                                 </Card>
+                                                <Divider />
                                             </Grid>
                                         ))}
                                     </>

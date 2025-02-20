@@ -7,7 +7,7 @@ import { SubPageBanner } from "@/components/banner/SubPageBanner";
 import styles from "@/app/[locale]/subpage.module.css";
 import TextEditorComponent from "@/components/SingePageText/TextEditor";
 
-const page = () => {
+const Page = () => {
     const t = useTranslations("NAVBAR");
     return (
         <Grid container className={styles.mainContainer} xs={12}>
@@ -54,4 +54,4 @@ const page = () => {
         </Grid>
     );
 };
-export default page;
+export default Page;

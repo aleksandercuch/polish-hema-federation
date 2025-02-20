@@ -1,7 +1,7 @@
 import ListOfPosts from "@/components/posts/ListOfPosts";
 
-const page = () => {
+const Page = () => {
     return <ListOfPosts />;
 };
 
-export default page;
+export default Page;

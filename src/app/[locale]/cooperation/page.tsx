@@ -8,7 +8,7 @@ import styles from "@/app/[locale]/subpage.module.css";
 import TextEditorComponent from "@/components/SingePageText/TextEditor";
 import Contact from "@/components/contact/Contact";
 
-const page = () => {
+const Page = () => {
     const t = useTranslations("NAVBAR");
 
     return (
@@ -63,4 +63,4 @@ const page = () => {
         </Grid>
     );
 };
-export default page;
+export default Page;

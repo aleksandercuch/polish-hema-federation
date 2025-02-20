@@ -7,7 +7,7 @@ import { Divider, Grid, Paper, Typography } from "@mui/material";
 import styles from "@/app/[locale]/subpage.module.css";
 import Gallery from "@/components/gallery/Gallery";
 
-const page = () => {
+const Page = () => {
     const t = useTranslations("NAVBAR");
 
     return (
@@ -50,4 +50,4 @@ const page = () => {
         </Grid>
     );
 };
-export default page;
+export default Page;

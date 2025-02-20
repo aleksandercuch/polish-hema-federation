@@ -1,7 +1,11 @@
 import { Locale, routing } from "./routing";
 
-const getRequestConfig = async ({ requestLocale }: any) => {
-    let locale: string | undefined = await requestLocale;
+interface RequestConfigParams {
+    requestLocale?: string;
+}
+
+const getRequestConfig = async ({ requestLocale }: RequestConfigParams) => {
+    let locale: string | undefined = requestLocale;
 
     if (!locale || !routing.locales.includes(locale as Locale)) {
         locale = routing.defaultLocale;

@@ -8,7 +8,8 @@ const Footer = () => {
             <Box
                 sx={{
                     zIndex: "2",
-                    position: "relative",
+                    position: "absolute",
+                    width: "100%",
                 }}
             >
                 <Paper>

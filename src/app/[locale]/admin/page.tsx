@@ -6,7 +6,7 @@ import { Grid, Paper, Typography } from "@mui/material";
 import styles from "@/app/[locale]/subpage.module.css";
 import { LoginForm } from "@/components/login/LoginForm";
 
-const page = () => {
+const Page = () => {
     return (
         <Grid container className={styles.mainContainer} xs={12}>
             <SubPageBanner />
@@ -31,4 +31,4 @@ const page = () => {
         </Grid>
     );
 };
-export default page;
+export default Page;
