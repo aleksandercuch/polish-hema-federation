@@ -5,6 +5,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 // MATERIAL
 import AppBar from "@mui/material/AppBar";
@@ -22,6 +23,7 @@ import styles from "./navbar.module.css";
 
 // COMPONENTS
 import { ChangeLanguageFlag } from "./ChangeLanguageFlag";
+import { useEffect } from "react";
 
 interface NavLinkParams {
     name: string;
@@ -30,60 +32,60 @@ interface NavLinkParams {
     ref?: string;
 }
 
-const navLinks: NavLinkParams[] = [
-    {
-        name: "News",
-        isReflink: true,
-        url: "/",
-        ref: "NewsHome",
-    },
-    {
-        name: "Schedule",
-        isReflink: true,
-        url: "/",
-
-        ref: "Schedule",
-    },
-    {
-        name: "Rules",
-        isReflink: false,
-        url: "/rules",
-    },
-    {
-        name: "Management",
-        isReflink: false,
-        url: "/management",
-    },
-    {
-        name: "Contact",
-        isReflink: false,
-        url: "/contact",
-    },
-    {
-        name: "Gallery",
-        isReflink: false,
-        url: "/gallery",
-    },
-    {
-        name: "Judges",
-        isReflink: false,
-        url: "/judges",
-    },
-    {
-        name: "Cooperation",
-        isReflink: false,
-        url: "/cooperation",
-    },
-    {
-        name: "Clubs",
-        isReflink: true,
-        url: "/",
-
-        ref: "OpenLayersMap",
-    },
-];
-
 export const ResponsiveAppBar = () => {
+    const t = useTranslations("NAVBAR");
+    const [currentLocale, setCurrentLocale] = React.useState("");
+    const navLinks: NavLinkParams[] = [
+        {
+            name: t("news"),
+            isReflink: true,
+            url: `/${currentLocale}`,
+            ref: "NewsHome",
+        },
+        {
+            name: t("schedule"),
+            isReflink: true,
+            url: `/${currentLocale}`,
+            ref: "Schedule",
+        },
+        {
+            name: t("rules"),
+            isReflink: false,
+            url: `/${currentLocale}/rules`,
+        },
+        {
+            name: t("management"),
+            isReflink: false,
+            url: `/${currentLocale}/management`,
+        },
+        {
+            name: t("contact"),
+            isReflink: false,
+            url: `/${currentLocale}/contact`,
+        },
+        {
+            name: t("gallery"),
+            isReflink: false,
+            url: `/${currentLocale}/gallery`,
+        },
+        {
+            name: t("judges"),
+            isReflink: false,
+            url: `/${currentLocale}/judges`,
+        },
+        {
+            name: t("cooperation"),
+            isReflink: false,
+            url: `/${currentLocale}/cooperation`,
+        },
+        {
+            name: t("clubs"),
+            isReflink: true,
+            url: `/${currentLocale}`,
+
+            ref: "OpenLayersMap",
+        },
+    ];
     const pathname = usePathname();
     const router = useRouter();
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -121,6 +123,10 @@ export const ResponsiveAppBar = () => {
         handleCloseNavMenu();
     };
 
+    useEffect(() => {
+        const currentLocale = window.location.pathname.split("/")[1];
+        setCurrentLocale(currentLocale);
+    }, []);
     return (
         <AppBar
             position="fixed"
@@ -128,11 +134,11 @@ export const ResponsiveAppBar = () => {
         >
             <Container maxWidth={false}>
                 <Toolbar disableGutters>
-                    <Link href="/">
+                    <Link href={`/${currentLocale}`}>
                         <Image
-                            src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/logo.jpg?alt=media&token=3d146e44-6a45-4367-b9ed-3708f2e4bb46"
+                            src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/Logo.jpg?alt=media&token=be8db20e-c749-49bd-82cc-2ed577a69c57"
                             alt="Example image"
-                            width={150}
+                            width={100}
                             height={100}
                             priority
                         />

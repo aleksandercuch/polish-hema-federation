@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 //TYPES
 import { PostT } from "@/types/post.type";
@@ -32,13 +33,15 @@ export const NewsHome = () => {
     const { setPost } = usePost();
     const router = useRouter();
     const theme = useTheme();
+    const t = useTranslations("COMMON");
+    const currentLocale = window.location.pathname.split("/")[1];
     const isReversedPost = (index: number) => {
         return index == 2 || index == 3 ? true : false;
     };
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const handleNavigation = (post: PostT) => {
         setPost(post);
-        router.push(`/posts/${post.id}`);
+        router.push(`${currentLocale}/posts/${post.id}`);
     };
     const fetchPosts = async () => {
         try {
@@ -115,8 +118,10 @@ export const NewsHome = () => {
                                 width: { sm: "50%", xs: "100%" },
                                 alignContent: "center",
                                 backgroundColor: {
-                                    md: isReversedPost(index) ? "red" : "white",
-                                    xs: index % 2 == 0 ? "white" : "red",
+                                    md: isReversedPost(index)
+                                        ? "#d32f2f"
+                                        : "white",
+                                    xs: index % 2 == 0 ? "white" : "#d32f2f",
                                 },
                             }}
                         >
@@ -141,7 +146,9 @@ export const NewsHome = () => {
                                                     : "inherit"
                                             }
                                         >
-                                            {post.titlePL}
+                                            {currentLocale == "pl"
+                                                ? post.titlePL
+                                                : post.titleENG}
                                         </Typography>
                                     </Grid>
                                     <Grid
@@ -160,7 +167,9 @@ export const NewsHome = () => {
                                                     maxWidth: "250px",
                                                 }}
                                             >
-                                                {post.introPL}
+                                                {currentLocale == "pl"
+                                                    ? post.introPL
+                                                    : post.introENG}
                                             </Typography>
                                         </Grid>
                                         <Grid item xs={6}>
@@ -179,7 +188,7 @@ export const NewsHome = () => {
                                                     handleNavigation(post)
                                                 }
                                             >
-                                                Show More
+                                                {t("show-more")}
                                             </Button>
                                         </Grid>
                                     </Grid>
@@ -205,7 +214,7 @@ export const NewsHome = () => {
                     color="error"
                     fullWidth
                 >
-                    Wszystkie posty
+                    {t("show-all-posts")}
                 </Button>
             </Link>
         </Grid>

@@ -1,12 +1,15 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { SubPageBanner } from "@/components/banner/SubPageBanner";
 // COMPONENTS
 import Contact from "@/components/contact/Contact";
 import { Divider, Grid, Paper, Typography } from "@mui/material";
-import styles from "@/app/subpage.module.css";
+import styles from "@/app/[locale]/subpage.module.css";
 
 const page = () => {
+    const t = useTranslations("NAVBAR");
+
     return (
         <Grid container className={styles.mainContainer} xs={12}>
             <SubPageBanner />
@@ -25,7 +28,7 @@ const page = () => {
                     variant="h3"
                     sx={{ padding: "30px 0", color: "white" }}
                 >
-                    Kontakt
+                    {t("contact")}
                 </Typography>
                 <Divider />
             </Grid>

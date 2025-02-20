@@ -1,7 +1,10 @@
 import React from "react";
 import { Grid, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 const MapEmbed = () => {
+    const t = useTranslations("COMMON");
+
     return (
         <Grid
             container
@@ -27,7 +30,7 @@ const MapEmbed = () => {
                     fontSize: "0.875rem",
                 }}
             >
-                KLUBY W POLSCE
+                {t("polish-clubs")}
             </Typography>
             <iframe
                 src="https://www.google.com/maps/d/embed?mid=1alcHTXsv1w0kUQmG6Www0kHqYyMD4BY_"

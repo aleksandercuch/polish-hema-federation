@@ -9,7 +9,7 @@ import {
     useState,
 } from "react";
 import Image from "next/image";
-import styles from "@/app/subpage.module.css";
+import styles from "@/app/[locale]/subpage.module.css";
 import { Controller, useForm } from "react-hook-form";
 import {
     EditorState,

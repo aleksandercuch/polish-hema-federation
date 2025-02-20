@@ -37,7 +37,7 @@ const Contact = (props: IProps) => {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
-
+    const currentLocale = window.location.pathname.split("/")[1];
     const currentUser = UserAuth();
 
     const deleteContact = async (data: contactParams) => {
@@ -173,7 +173,9 @@ const Contact = (props: IProps) => {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1">
-                                                {element.descriptionPL}
+                                                {currentLocale == "pl"
+                                                    ? element.descriptionPL
+                                                    : element.descriptionENG}
                                             </Typography>
                                         </Grid>
                                         <Grid item container xs={12}>
@@ -283,8 +285,9 @@ const Contact = (props: IProps) => {
                                 >
                                     <Button
                                         fullWidth
+                                        color="error"
                                         type="submit"
-                                        variant="contained"
+                                        variant="outlined"
                                         size="small"
                                         sx={{ mb: 2 }}
                                         onClick={() => setIsAdding(true)}

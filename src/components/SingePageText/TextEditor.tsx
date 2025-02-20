@@ -44,6 +44,7 @@ const TextEditorComponent = (props: pageParams) => {
     const [elements, setElements] = useState<editorParams | null>();
     const [isEditing, setIsEditing] = useState(false);
     const currentUser = UserAuth();
+    const currentLocale = window.location.pathname.split("/")[1];
 
     const form = useForm<editorParams>({
         defaultValues: {
@@ -123,12 +124,13 @@ const TextEditorComponent = (props: pageParams) => {
                 <>
                     {!isEditing ? (
                         <Button
-                            fullWidth
+                            color="error"
                             type="submit"
-                            variant="contained"
+                            variant="outlined"
                             size="small"
                             sx={{ mb: 2 }}
                             onClick={() => setIsEditing(true)}
+                            fullWidth
                         >
                             Edytuj
                         </Button>
@@ -227,7 +229,9 @@ const TextEditorComponent = (props: pageParams) => {
                     style={{ padding: "0 5px" }}
                     dangerouslySetInnerHTML={{
                         __html: convertDraftToHtmlWithEmptyBlocks(
-                            elements.descriptionPL as RawDraftContentState
+                            currentLocale == "pl"
+                                ? (elements.descriptionPL as RawDraftContentState)
+                                : (elements.descriptionENG as RawDraftContentState)
                         ),
                     }}
                 />

@@ -3,7 +3,7 @@
 import { SubPageBanner } from "@/components/banner/SubPageBanner";
 // COMPONENTS
 import { Grid, Paper, Typography } from "@mui/material";
-import styles from "@/app/subpage.module.css";
+import styles from "@/app/[locale]/subpage.module.css";
 import { LoginForm } from "@/components/login/LoginForm";
 
 const page = () => {
@@ -23,7 +23,7 @@ const page = () => {
                     xs={12}
                 >
                     <Grid item xs={12} sx={{ textAlign: "center" }}>
-                        <Typography variant="h3">Kontakt</Typography>
+                        <Typography variant="h3">Admin</Typography>
                     </Grid>
                     <LoginForm />
                 </Grid>

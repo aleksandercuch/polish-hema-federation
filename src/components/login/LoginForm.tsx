@@ -48,12 +48,12 @@ export const LoginForm = () => {
     return (
         <>
             {currentUser?.user?.email ? (
-                <Grid item xs={12}>
+                <Grid item mt={10} xs={12} sx={{ textAlign: "center" }}>
                     <Button
                         type="submit"
                         variant="outlined"
+                        color="error"
                         onClick={handleLogout}
-                        fullWidth
                     >
                         Wyloguj
                     </Button>
@@ -110,6 +110,7 @@ export const LoginForm = () => {
                     <Button
                         type="submit"
                         variant="outlined"
+                        color="error"
                         sx={{ marginTop: "20px" }}
                     >
                         Zaloguj
