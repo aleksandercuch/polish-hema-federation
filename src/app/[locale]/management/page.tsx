@@ -1,7 +1,7 @@
 "use client";
 import Management from "@/components/management/Management";
 
-const page = () => {
+const Page = () => {
     return (
         <>
             <Management />
@@ -9,4 +9,4 @@ const page = () => {
     );
 };
 
-export default page;
+export default Page;

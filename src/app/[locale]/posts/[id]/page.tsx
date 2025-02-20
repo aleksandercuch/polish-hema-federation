@@ -1,6 +1,6 @@
 import Post from "@/components/posts/Post";
 
-const page = () => {
+const Page = () => {
     return (
         <>
             <Post />
@@ -8,4 +8,4 @@ const page = () => {
     );
 };
 
-export default page;
+export default Page;

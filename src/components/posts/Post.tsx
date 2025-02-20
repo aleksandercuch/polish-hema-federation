@@ -158,7 +158,9 @@ const Post = () => {
                 </Paper>
                 <Paper
                     className={styles.postContainer}
-                    sx={{ padding: { md: "70px 100px", xs: "10px" } }}
+                    sx={{
+                        padding: { md: "70px 100px", xs: "10px" },
+                    }}
                 >
                     {post.id && !loading ? (
                         <>
