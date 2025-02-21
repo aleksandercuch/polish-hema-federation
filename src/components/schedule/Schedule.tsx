@@ -86,7 +86,7 @@ export const Schedule = () => {
             <CardMedia
                 component="img"
                 image={
-                    "https://historicalmartialarts.eu/wp-content/uploads/2022/12/K_HemaEventCalendar.jpg"
+                    "https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/kalendarz.jpg?alt=media&token=b684c3fa-85fd-4947-869a-9cceb0612ddd"
                 }
                 alt="Post picture error"
                 sx={{
