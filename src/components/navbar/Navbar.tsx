@@ -20,6 +20,7 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import styles from "./navbar.module.css";
+import colors from "@/utils/constants/colors";
 
 // COMPONENTS
 import { ChangeLanguageFlag } from "./ChangeLanguageFlag";
@@ -130,7 +131,7 @@ export const ResponsiveAppBar = () => {
     return (
         <AppBar
             position="fixed"
-            sx={{ backgroundColor: "white", color: "black" }}
+            sx={{ backgroundColor: `${colors.white}`, color: "black" }}
         >
             <Container maxWidth={false}>
                 <Toolbar disableGutters>

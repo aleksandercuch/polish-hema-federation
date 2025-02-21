@@ -25,10 +25,16 @@ import {
     ThemeProvider,
 } from "@mui/material";
 
-// CONTEXT
-import { usePost } from "@/contexts/PostsContext";
+// FIREBASE
 import { query, collection, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase/config/clientApp";
+
+// CONTEXT
+import { usePost } from "@/contexts/PostsContext";
+import { Loader } from "../loader/loader";
+
+// UTILS
+import colors from "@/utils/constants/colors";
 
 export const NewsHome = () => {
     const [posts, setPosts] = useState<PostT[]>([]);
@@ -89,114 +95,75 @@ export const NewsHome = () => {
                 marginTop: { md: "100vh", xs: "35vh" },
             }}
         >
-            <ThemeProvider theme={colorTheme}>
-                {posts.map((post, index) => (
-                    <Grid
-                        item
-                        xs={12}
-                        md={
-                            posts.length != 6 &&
-                            posts.length % 2 != 0 &&
-                            index == posts.length - 1
-                                ? 12
-                                : 6
-                        }
-                        sx={{
-                            maxHeight: {
-                                md: `${posts.length == 5 ? "240px" : "30vh"}`,
-                                xs: `${posts.length == 5 ? "240px" : "60vh"}`,
-                            },
-                            display: { xs: "none", sm: "block" },
-                        }}
-                        key={post.id}
-                    >
-                        <Card
+            {posts.length > 0 ? (
+                <ThemeProvider theme={colorTheme}>
+                    {posts.map((post, index) => (
+                        <Grid
+                            item
+                            xs={12}
+                            md={
+                                posts.length != 6 &&
+                                posts.length % 2 != 0 &&
+                                index == posts.length - 1
+                                    ? 12
+                                    : 6
+                            }
                             sx={{
-                                display: { sm: "flex", xs: "block" },
-                                flexDirection: {
-                                    md: isReversedPost(index)
-                                        ? "row-reverse"
-                                        : "row",
-                                    xs: index % 2 == 0 ? "row" : "row-reverse",
+                                maxHeight: {
+                                    md: `${
+                                        posts.length == 5 ? "240px" : "30vh"
+                                    }`,
+                                    xs: `${
+                                        posts.length == 5 ? "240px" : "60vh"
+                                    }`,
                                 },
-                                flex: "50% 50%",
-                                textAlign: "center",
-                                height: "100%",
+                                display: { xs: "none", sm: "block" },
                             }}
+                            key={post.id}
                         >
-                            <Box
+                            <Card
                                 sx={{
-                                    width: { sm: "50%", xs: "100%" },
-                                    alignContent: "center",
-                                    backgroundColor: {
+                                    display: { sm: "flex", xs: "block" },
+                                    flexDirection: {
                                         md: isReversedPost(index)
-                                            ? "#d32f2f"
-                                            : "white",
+                                            ? "row-reverse"
+                                            : "row",
                                         xs:
                                             index % 2 == 0
-                                                ? "white"
-                                                : "#d32f2f",
+                                                ? "row"
+                                                : "row-reverse",
                                     },
+                                    flex: "50% 50%",
+                                    textAlign: "center",
+                                    height: "100%",
                                 }}
                             >
-                                <CardContent sx={{ margin: "10px" }}>
-                                    <Grid
-                                        container
-                                        direction="column"
-                                        alignItems="center"
-                                        spacing={4}
-                                    >
-                                        <Grid item>
-                                            <Typography
-                                                component="div"
-                                                variant="h5"
-                                                color={
-                                                    !isSmallScreen
-                                                        ? isReversedPost(index)
-                                                            ? "secondary"
-                                                            : "error"
-                                                        : index % 2 == 0
-                                                        ? "error"
-                                                        : "secondary"
-                                                }
-                                            >
-                                                {currentLocale == "pl"
-                                                    ? post.titlePL
-                                                    : post.titleENG}
-                                            </Typography>
-                                        </Grid>
+                                <Box
+                                    sx={{
+                                        width: { sm: "50%", xs: "100%" },
+                                        alignContent: "center",
+                                        backgroundColor: {
+                                            md: isReversedPost(index)
+                                                ? `${colors.red}`
+                                                : `${colors.white}`,
+                                            xs:
+                                                index % 2 == 0
+                                                    ? `${colors.white}`
+                                                    : `${colors.red}`,
+                                        },
+                                    }}
+                                >
+                                    <CardContent sx={{ margin: "10px" }}>
                                         <Grid
-                                            item
                                             container
-                                            alignItems="center"
                                             direction="column"
-                                            spacing={2}
+                                            alignItems="center"
+                                            spacing={4}
                                         >
                                             <Grid item>
                                                 <Typography
-                                                    variant="subtitle1"
                                                     component="div"
-                                                    sx={{
-                                                        color: !isSmallScreen
-                                                            ? isReversedPost(
-                                                                  index
-                                                              )
-                                                                ? "white"
-                                                                : "text.secondary"
-                                                            : index % 2 == 0
-                                                            ? "text.secondary"
-                                                            : "white",
-                                                        maxWidth: "250px",
-                                                    }}
-                                                >
-                                                    {currentLocale == "pl"
-                                                        ? post.introPL
-                                                        : post.introENG}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={6}>
-                                                <Button
-                                                    variant="outlined"
+                                                    variant="h5"
                                                     color={
                                                         !isSmallScreen
                                                             ? isReversedPost(
@@ -208,30 +175,96 @@ export const NewsHome = () => {
                                                             ? "error"
                                                             : "secondary"
                                                     }
-                                                    onClick={() =>
-                                                        handleNavigation(post)
-                                                    }
                                                 >
-                                                    {t("show-more")}
-                                                </Button>
+                                                    {currentLocale == "pl"
+                                                        ? post.titlePL
+                                                        : post.titleENG}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid
+                                                item
+                                                container
+                                                alignItems="center"
+                                                direction="column"
+                                                spacing={2}
+                                            >
+                                                <Grid item>
+                                                    <Typography
+                                                        variant="subtitle1"
+                                                        component="div"
+                                                        sx={{
+                                                            color: !isSmallScreen
+                                                                ? isReversedPost(
+                                                                      index
+                                                                  )
+                                                                    ? `${colors.white}`
+                                                                    : "text.secondary"
+                                                                : index % 2 == 0
+                                                                ? "text.secondary"
+                                                                : `${colors.white}`,
+                                                            maxWidth: "250px",
+                                                        }}
+                                                    >
+                                                        {currentLocale == "pl"
+                                                            ? post.introPL
+                                                            : post.introENG}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    <Button
+                                                        variant="outlined"
+                                                        color={
+                                                            !isSmallScreen
+                                                                ? isReversedPost(
+                                                                      index
+                                                                  )
+                                                                    ? "secondary"
+                                                                    : "error"
+                                                                : index % 2 == 0
+                                                                ? "error"
+                                                                : "secondary"
+                                                        }
+                                                        onClick={() =>
+                                                            handleNavigation(
+                                                                post
+                                                            )
+                                                        }
+                                                    >
+                                                        {t("show-more")}
+                                                    </Button>
+                                                </Grid>
                                             </Grid>
                                         </Grid>
-                                    </Grid>
-                                </CardContent>
-                            </Box>
-                            <CardMedia
-                                component="img"
-                                image={post.mainFile as string}
-                                alt="Post picture error"
-                                sx={{
-                                    width: { sm: "50%", xs: "100%" },
-                                    maxHeight: "700px",
-                                }}
-                            />
-                        </Card>
-                    </Grid>
-                ))}
-            </ThemeProvider>
+                                    </CardContent>
+                                </Box>
+                                <CardMedia
+                                    component="img"
+                                    image={post.mainFile as string}
+                                    alt="Post picture error"
+                                    sx={{
+                                        width: { sm: "50%", xs: "100%" },
+                                        maxHeight: "700px",
+                                    }}
+                                />
+                            </Card>
+                        </Grid>
+                    ))}
+                </ThemeProvider>
+            ) : (
+                <Grid
+                    item
+                    sx={{
+                        height: { md: "100vh", xs: "none" },
+                        background: `${colors.white}`,
+                        width: "100%",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        display: { xs: "none", sm: "block" },
+                    }}
+                >
+                    <Loader />
+                </Grid>
+            )}
             <Link href={`/${currentLocale}/posts`}>
                 <Button
                     className={styles.postsButton}

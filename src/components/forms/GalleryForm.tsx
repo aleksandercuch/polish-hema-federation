@@ -23,9 +23,9 @@ import {
 import { memberParams } from "@/types/management.interface";
 
 // UTILS
-import { OPERATION_MODE } from "../constants/operationModeEnum";
-import { addRandomSuffix } from "../post/addRandomSuffix";
-import { arraysEqual } from "../array/arrayIsEqual";
+import { OPERATION_MODE } from "../../utils/constants/operationModeEnum";
+import { addRandomSuffix } from "../../utils/post/addRandomSuffix";
+import { arraysEqual } from "../../utils/array/arrayIsEqual";
 
 export interface sectionParams {
     id: string;

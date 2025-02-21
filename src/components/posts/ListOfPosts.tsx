@@ -1,10 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
-import Image from "next/image";
-import styles from "@/app/[locale]/subpage.module.css";
 import { PostT } from "@/types/post.type";
-import { usePost } from "@/contexts/PostsContext";
 import {
     Button,
     Grid,
@@ -17,8 +15,15 @@ import {
     Divider,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+
+// COMPONENTS
 import { Loader } from "../loader/loader";
 import PostFormControl from "./PostFormControl";
+
+// STYLE
+import styles from "@/app/[locale]/subpage.module.css";
+
+// FIREBASE
 import {
     collection,
     getDocs,
@@ -29,11 +34,15 @@ import {
     QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "../../../firebase/config/clientApp";
-import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
-import { useTranslations } from "next-intl";
 
 //CONTEXT
 import { UserAuth } from "@/contexts/AuthContext";
+import { SubPageBanner } from "../banner/SubPageBanner";
+import { usePost } from "@/contexts/PostsContext";
+
+// UTILS
+import colors from "@/utils/constants/colors";
+import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 
 const POSTS_PER_PAGE = 10;
 
@@ -104,14 +113,7 @@ const ListOfPosts = () => {
 
     return (
         <Grid container className={styles.mainContainer}>
-            <Grid item className={styles.postBanner}>
-                <Image
-                    src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/banner.jpg?alt=media&token=1f1dffd9-bb98-4e88-8e46-53324347f806"
-                    alt="Example image"
-                    fill
-                    priority
-                />
-            </Grid>
+            <SubPageBanner />
             <Paper
                 className={styles.subpageBackground}
                 sx={{
@@ -119,7 +121,10 @@ const ListOfPosts = () => {
                         xs: "100%",
                         lg: "55%",
                     },
-                    backgroundColor: "rgba(255, 0, 0, 0.5)",
+                    backgroundColor: {
+                        md: `${colors.fadeRed}`,
+                        xs: `${colors.red}`,
+                    },
                 }}
             >
                 <Paper
@@ -212,9 +217,10 @@ const ListOfPosts = () => {
                                                                         component="div"
                                                                         variant="h5"
                                                                     >
-                                                                        {
-                                                                            post.titlePL
-                                                                        }
+                                                                        {currentLocale ==
+                                                                        "pl"
+                                                                            ? post.titlePL
+                                                                            : post.titleENG}
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid
@@ -234,9 +240,10 @@ const ListOfPosts = () => {
                                                                                     "250px",
                                                                             }}
                                                                         >
-                                                                            {
-                                                                                post.introPL
-                                                                            }
+                                                                            {currentLocale ==
+                                                                            "pl"
+                                                                                ? post.introPL
+                                                                                : post.introENG}
                                                                         </Typography>
                                                                     </Grid>
                                                                     <Grid
@@ -280,7 +287,18 @@ const ListOfPosts = () => {
                                         ))}
                                     </>
                                 ) : (
-                                    <Loader />
+                                    <Grid
+                                        item
+                                        sx={{
+                                            height: "100vh",
+                                            background: `${colors.white}`,
+                                            width: "100%",
+                                            alignContent: "center",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <Loader />
+                                    </Grid>
                                 )}
                                 {/* Pagination Buttons */}
                                 <Grid

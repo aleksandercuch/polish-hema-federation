@@ -14,7 +14,7 @@ import { db, storage } from "../../../firebase/config/clientApp";
 import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 
 // COMPONENTS
-import CreateSectionForm from "@/utils/forms/createSectionForm";
+import CreateSectionForm from "@/components/forms/createSectionForm";
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 import { Loader } from "../loader/loader";
 
@@ -25,7 +25,7 @@ import { isStringArray } from "@/types/typeGuards/isArrayofStrings";
 // UTILS
 import { convertImagesToGallery } from "@/utils/post/convertImagesToGallery";
 import { fileExists } from "@/utils/storage/fileExistInStorage";
-import GalleryForm from "@/utils/forms/GalleryForm";
+import GalleryForm from "@/components/forms/GalleryForm";
 
 // CONTEXT
 import { UserAuth } from "@/contexts/AuthContext";

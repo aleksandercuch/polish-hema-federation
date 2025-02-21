@@ -30,7 +30,7 @@ import { DEFAULT_AVATAR } from "@/utils/constants/constants";
 
 // TYPES
 import { memberParams, sectionParams } from "@/types/management.interface";
-import { OPERATION_MODE } from "../constants/operationModeEnum";
+import { OPERATION_MODE } from "../../utils/constants/operationModeEnum";
 
 interface IProps {
     setOpen: Dispatch<SetStateAction<OPERATION_MODE>>;

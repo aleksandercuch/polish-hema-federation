@@ -1,5 +1,3 @@
-"use client";
-
 // COMPONENTS
 import { Banner } from "@/components/banner/Banner";
 import { NewsHome } from "@/components/posts/NewsHome";

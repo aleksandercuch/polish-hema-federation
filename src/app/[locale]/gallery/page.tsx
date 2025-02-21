@@ -1,11 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { SubPageBanner } from "@/components/banner/SubPageBanner";
+
 // COMPONENTS
 import { Divider, Grid, Paper, Typography } from "@mui/material";
-import styles from "@/app/[locale]/subpage.module.css";
 import Gallery from "@/components/gallery/Gallery";
+import { SubPageBanner } from "@/components/banner/SubPageBanner";
+
+// STYLES
+import colors from "@/utils/constants/colors";
+import styles from "@/app/[locale]/subpage.module.css";
 
 const Page = () => {
     const t = useTranslations("NAVBAR");
@@ -19,14 +23,14 @@ const Page = () => {
                 sx={{
                     textAlign: "center",
                     width: "100%",
-                    backgroundColor: "#d32f2f",
+                    backgroundColor: `${colors.red}`,
                     position: "relative",
                     top: "35vh",
                 }}
             >
                 <Typography
                     variant="h3"
-                    sx={{ padding: "30px 0", color: "white" }}
+                    sx={{ padding: "30px 0", color: `${colors.white}` }}
                 >
                     {t("gallery")}
                 </Typography>
