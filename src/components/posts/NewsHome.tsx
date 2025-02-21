@@ -251,19 +251,20 @@ export const NewsHome = () => {
                     ))}
                 </ThemeProvider>
             ) : (
-                <Grid
-                    item
-                    sx={{
-                        height: { md: "100vh", xs: "none" },
-                        background: `${colors.white}`,
-                        width: "100%",
-                        alignContent: "center",
-                        justifyContent: "center",
-                        display: { xs: "none", sm: "block" },
-                    }}
-                >
-                    <Loader />
-                </Grid>
+                <></>
+                // <Grid
+                //     item
+                //     sx={{
+                //         height: { md: "100vh", xs: "none" },
+                //         background: `${colors.white}`,
+                //         width: "100%",
+                //         alignContent: "center",
+                //         justifyContent: "center",
+                //         display: { xs: "none", sm: "block" },
+                //     }}
+                // >
+                //     <Loader />
+                // </Grid>
             )}
             <Link href={`/${currentLocale}/posts`}>
                 <Button

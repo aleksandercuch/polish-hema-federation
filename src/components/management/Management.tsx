@@ -199,7 +199,7 @@ const Management = () => {
                     }}
                     xs={12}
                 >
-                    {loading || sectionsList.length <= 0 ? (
+                    {loading ? (
                         <Grid item>
                             <Loader />
                         </Grid>
