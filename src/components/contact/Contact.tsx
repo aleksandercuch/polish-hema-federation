@@ -16,7 +16,7 @@ import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 // UTILS
 
 import { DEFAULT_AVATAR } from "@/utils/constants/constants";
-import ContactForm from "@/utils/forms/contactForm";
+import ContactForm from "@/components/forms/contactForm";
 
 // TYPES
 import { contactParams, defaultContact } from "@/types/management.interface";

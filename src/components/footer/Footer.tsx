@@ -1,6 +1,12 @@
-import { Box, Paper, Grid, Typography, Divider } from "@mui/material";
+// CORE
 import React from "react";
 import dayjs from "dayjs";
+
+// STYLES
+import { Box, Paper, Grid, Typography, Divider } from "@mui/material";
+
+// UTILS
+import colors from "@/utils/constants/colors";
 
 const Footer = () => {
     return (
@@ -19,8 +25,8 @@ const Footer = () => {
                             direction: "row",
                             justifyItems: "center",
                             alignItems: "center",
-                            backgroundColor: "#d32f2f",
-                            color: "white",
+                            backgroundColor: `${colors.red}`,
+                            color: `${colors.white}`,
                         }}
                         spacing={3}
                     >

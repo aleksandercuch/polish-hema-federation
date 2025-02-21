@@ -1,6 +1,14 @@
-import React from "react";
-import { Grid, Typography } from "@mui/material";
+"use client";
+
+// CORE
 import { useTranslations } from "next-intl";
+import React from "react";
+
+// MATERIAL
+import { Grid, Typography } from "@mui/material";
+
+// UTILS
+import colors from "@/utils/constants/colors";
 
 const MapEmbed = () => {
     const t = useTranslations("COMMON");
@@ -17,11 +25,11 @@ const MapEmbed = () => {
         >
             <Typography
                 sx={{
-                    color: "white",
+                    color: `${colors.white}`,
                     width: "100%",
                     height: "60px",
                     textAlign: "center",
-                    backgroundColor: "#d32f2f",
+                    backgroundColor: `${colors.red}`,
                     marginBottom: "-60px",
                     zIndex: "100",
                     alignContent: "center",

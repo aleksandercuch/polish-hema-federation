@@ -14,6 +14,7 @@ import {
     Typography,
 } from "@mui/material";
 import styles from "@/app/[locale]/subpage.module.css";
+import colors from "@/utils/constants/colors";
 
 //FIREBASE
 import { deleteObject, ref } from "firebase/storage";
@@ -41,10 +42,10 @@ import { isMemberParams } from "@/types/typeGuards/isMemberParams";
 
 // UTILS
 import { removeElementAtIndex } from "@/utils/array/deleteWithIndex";
-import { MemberForm } from "@/utils/forms/memberForm";
+import { MemberForm } from "@/components/forms/memberForm";
 import { fileExists } from "@/utils/storage/fileExistInStorage";
 import { DEFAULT_AVATAR } from "@/utils/constants/constants";
-import CreateSectionForm from "@/utils/forms/createSectionForm";
+import CreateSectionForm from "@/components/forms/createSectionForm";
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 
 //CONTEXT
@@ -173,14 +174,14 @@ const Management = () => {
                 sx={{
                     textAlign: "center",
                     width: "100%",
-                    backgroundColor: "#d32f2f",
+                    backgroundColor: `${colors.red}`,
                     position: "relative",
                     top: "35vh",
                 }}
             >
                 <Typography
                     variant="h3"
-                    sx={{ padding: "30px 0", color: "white" }}
+                    sx={{ padding: "30px 0", color: `${colors.white}` }}
                 >
                     {t("management")}
                 </Typography>

@@ -37,10 +37,12 @@ import { convertFirebaseTimestamp } from "@/utils/post/convertFirebaseTimestamp"
 import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
 //import { defaultPostValues } from "@/utils/post/postDefaultValues";
 import { fileExists } from "@/utils/storage/fileExistInStorage";
+import colors from "@/utils/constants/colors";
 
 //CONTEXT
 import { UserAuth } from "@/contexts/AuthContext";
 import { RawDraftContentState } from "react-draft-wysiwyg";
+import { SubPageBanner } from "../banner/SubPageBanner";
 
 const Post = () => {
     const { id } = useParams();
@@ -133,14 +135,7 @@ const Post = () => {
 
     return (
         <Grid container className={styles.mainContainer}>
-            <Grid item className={styles.postBanner}>
-                <Image
-                    src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/banner.jpg?alt=media&token=1f1dffd9-bb98-4e88-8e46-53324347f806"
-                    alt="Example image"
-                    fill
-                    priority
-                />
-            </Grid>
+            <SubPageBanner />
             <Paper
                 className={styles.subpageBackground}
                 sx={{
@@ -148,12 +143,24 @@ const Post = () => {
                         xs: "100%",
                         lg: "55%",
                     },
-                    backgroundColor: "rgba(255, 0, 0, 0.5)",
+                    backgroundColor: {
+                        md: `${colors.fadeRed}`,
+                        xs: `${colors.red}`,
+                    },
                 }}
             >
                 <Paper>
                     <Link href={`/${currentLocale}/posts`}>
-                        <Button>{t("show-all-posts")}</Button>
+                        <Button
+                            sx={{
+                                width: {
+                                    xs: "100%",
+                                    md: "inherit",
+                                },
+                            }}
+                        >
+                            {t("show-all-posts")}
+                        </Button>
                     </Link>
                 </Paper>
                 <Paper
@@ -285,7 +292,18 @@ const Post = () => {
                             )}
                         </>
                     ) : (
-                        <Loader />
+                        <Grid
+                            item
+                            sx={{
+                                height: "100vh",
+                                background: `${colors.white}`,
+                                width: "100%",
+                                alignContent: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Loader />
+                        </Grid>
                     )}
                 </Paper>
             </Paper>

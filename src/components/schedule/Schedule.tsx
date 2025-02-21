@@ -3,7 +3,6 @@
 // CORE
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { useTranslations } from "next-intl";
 
 // ASSETS
 import Card from "@mui/material/Card";
@@ -19,8 +18,11 @@ import styles from "./schedule.module.css";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../firebase/config/clientApp";
 
+// COMPONENTS
+import ScheduleForm from "@/components/forms/ScheduleForm";
+
 // UTILS
-import ScheduleForm from "@/utils/forms/ScheduleForm";
+import colors from "@/utils/constants/colors";
 
 // CONTEXT
 import { UserAuth } from "@/contexts/AuthContext";
@@ -32,7 +34,6 @@ export const Schedule = () => {
     const [editMode, setEditMode] = useState(false);
     const [schedule, setSchedule] = useState<string>();
     const currentUser = UserAuth();
-    const t = useTranslations("COMMON");
 
     const fetchSchedule = async () => {
         try {
@@ -90,14 +91,14 @@ export const Schedule = () => {
                 alt="Post picture error"
                 sx={{
                     width: { sm: "50%", xs: "100%" },
-                    border: "30px solid #d32f2f",
+                    border: `30px solid ${colors.red}`,
                 }}
             />
             <Box
                 sx={{
                     width: { sm: "50%", xs: "100%" },
                     alignContent: "center",
-                    backgroundColor: "white",
+                    backgroundColor: `${colors.white}`,
                 }}
             >
                 <CardContent>
@@ -109,7 +110,7 @@ export const Schedule = () => {
                     >
                         <Grid item>
                             <Typography component="div" variant="h5">
-                                {t("schedule")}{" "}
+                                Harmonogram Zawodów{" "}
                                 {dayjs(new Date()).format("YYYY")}
                             </Typography>
                         </Grid>
@@ -142,7 +143,7 @@ export const Schedule = () => {
                                                 downloadSchedule(schedule)
                                             }
                                         >
-                                            {t("show-schedule")}
+                                            Pokaż Harmonogram
                                         </Button>
                                     </Grid>
                                 )}

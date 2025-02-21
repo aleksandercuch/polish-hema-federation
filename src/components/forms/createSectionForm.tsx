@@ -19,7 +19,7 @@ import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 
 // TYPES
 import { memberParams } from "@/types/management.interface";
-import { OPERATION_MODE } from "../constants/operationModeEnum";
+import { OPERATION_MODE } from "../../utils/constants/operationModeEnum";
 
 export interface sectionParams {
     id: string;
