@@ -31,7 +31,7 @@ import { db } from "../../../firebase/config/clientApp";
 
 // CONTEXT
 import { usePost } from "@/contexts/PostsContext";
-import { Loader } from "../loader/loader";
+//import { Loader } from "../loader/loader";
 
 // UTILS
 import colors from "@/utils/constants/colors";
