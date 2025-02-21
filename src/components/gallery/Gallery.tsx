@@ -112,7 +112,7 @@ const Gallery = () => {
     }, [mode]);
     return (
         <>
-            {loading || sectionsList.length <= 0 ? (
+            {loading ? (
                 <Grid item>
                     <Loader />
                 </Grid>
