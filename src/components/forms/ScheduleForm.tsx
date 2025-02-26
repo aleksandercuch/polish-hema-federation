@@ -41,6 +41,7 @@ const ScheduleForm = (props: IProps) => {
     } = form;
 
     const submitForm = async (data: Schedule) => {
+        console.log(data);
         if (!mainFile || mainFile.length === 0) {
             console.error("No file selected.");
             return;
