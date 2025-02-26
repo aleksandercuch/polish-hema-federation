@@ -63,7 +63,8 @@ const Management = () => {
     const t = useTranslations("NAVBAR");
     const handleDeleteMember = async (
         section: sectionParams,
-        member: memberParams
+        member: memberParams,
+        index: number
     ) => {
         if (!section.id) return;
 
@@ -80,7 +81,7 @@ const Management = () => {
 
             const updatedMembers = removeElementAtIndex(
                 section.members as memberParams[],
-                member.id
+                index
             );
             await updateDoc(doc(db, "management", section.id), {
                 name: section.name,
@@ -328,7 +329,7 @@ const Management = () => {
                                                 ) &&
                                                 section.members //  @ts-expect-error: temporary solution
                                                     .filter(isMemberParams)
-                                                    .map((member) => (
+                                                    .map((member, index) => (
                                                         <Grid
                                                             item
                                                             key={member.id}
@@ -451,7 +452,8 @@ const Management = () => {
                                                                             onClick={() =>
                                                                                 handleDeleteMember(
                                                                                     section,
-                                                                                    member
+                                                                                    member,
+                                                                                    index
                                                                                 )
                                                                             }
                                                                         >
