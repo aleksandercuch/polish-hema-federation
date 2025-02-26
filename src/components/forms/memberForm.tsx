@@ -97,8 +97,9 @@ export const MemberForm = (props: IProps) => {
                     });
                 }
             }
+
             const newMember: memberParams = {
-                id: props.member!.id || props.section.members.length,
+                id: props.section.members.length,
                 descriptionPL: data.descriptionPL,
                 descriptionENG: data.descriptionENG,
                 name: data.name,
@@ -107,7 +108,6 @@ export const MemberForm = (props: IProps) => {
                         ? downloadURL
                         : (props.member!.file as string),
             };
-
             if (props.mode === OPERATION_MODE.Edit && props.member) {
                 const updatedMembers = updateArrayElement(
                     sectionMembers,

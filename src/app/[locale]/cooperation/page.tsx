@@ -32,7 +32,7 @@ const Page = () => {
                     variant="h3"
                     sx={{ padding: "30px 0", color: `${colors.white}` }}
                 >
-                    {t("judges")}
+                    {t("cooperation")}
                 </Typography>
                 <Divider />
             </Grid>

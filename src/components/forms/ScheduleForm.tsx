@@ -41,7 +41,6 @@ const ScheduleForm = (props: IProps) => {
     } = form;
 
     const submitForm = async (data: Schedule) => {
-        console.log(data);
         if (!mainFile || mainFile.length === 0) {
             console.error("No file selected.");
             return;
@@ -50,7 +49,7 @@ const ScheduleForm = (props: IProps) => {
         setLoading(true);
 
         try {
-            const storageRef = ref(storage, `regulamin.pdf`);
+            const storageRef = ref(storage, `schedule.pdf`);
 
             await uploadBytes(storageRef, mainFile[0]).then(() => {
                 alert("Zaktualizowałeś harmonogram!");

@@ -37,7 +37,7 @@ export const Schedule = () => {
 
     const fetchSchedule = async () => {
         try {
-            const fileRef = ref(storage, `regulamin.pdf`);
+            const fileRef = ref(storage, `schedule.pdf`);
 
             const url = await getDownloadURL(fileRef);
 
