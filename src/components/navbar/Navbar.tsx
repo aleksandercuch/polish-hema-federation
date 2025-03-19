@@ -235,7 +235,7 @@ export const ResponsiveAppBar = () => {
                             }}
                         >
                             <a
-                                href="https://www.facebook.com/FederPoland"
+                                href="https://www.facebook.com/profile.php?id=61574558300859"
                                 target="_blank"
                             >
                                 <FacebookIcon className={styles.mediaIcon} />
