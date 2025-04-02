@@ -23,7 +23,8 @@ import { OPERATION_MODE } from "../../utils/constants/operationModeEnum";
 
 export interface sectionParams {
     id: string;
-    name: string;
+    namePL: string;
+    nameENG: string;
     members: memberParams[] | string[];
 }
 
@@ -39,7 +40,8 @@ interface IProps {
 const CreateSectionForm = (props: IProps) => {
     const form = useForm<sectionParams>({
         defaultValues: {
-            name: props.section ? props.section.name : "",
+            namePL: props.section ? props.section.namePL : "",
+            nameENG: props.section ? props.section.nameENG : "",
             members: props.section ? props.section.members : [],
         },
     });
@@ -56,11 +58,12 @@ const CreateSectionForm = (props: IProps) => {
         if (props.section && props.section.id) {
             // EDITION
             updateDoc(doc(db, props.collection, props.section.id), {
-                name: data.name,
+                namePL: data.namePL,
+                nameENG: data.nameENG,
                 members: props.section.members,
             })
                 .then(() => {
-                    alert(`Zakończyłeś edycję ${data.name}!`);
+                    alert(`Zakończyłeś edycję ${data.namePL}!`);
                     reset();
                     props.setOpen(OPERATION_MODE.None);
                 })
@@ -70,7 +73,8 @@ const CreateSectionForm = (props: IProps) => {
         } else {
             //ADDING
             addDoc(collection(db, props.collection), {
-                name: data.name,
+                namePL: data.namePL,
+                nameENG: data.nameENG,
                 members: [],
             }).then(() => {
                 alert("Stworzyłeś nową sekcję!");
@@ -89,7 +93,7 @@ const CreateSectionForm = (props: IProps) => {
         >
             <Typography variant="h4" sx={{ mb: "10px" }}>
                 {props.mode === OPERATION_MODE.Edit && props.section ? (
-                    <>Edytujesz {props.section.name}</>
+                    <>Edytujesz {props.section.namePL}</>
                 ) : (
                     <>Dodajesz nową sekcję</>
                 )}
@@ -98,14 +102,34 @@ const CreateSectionForm = (props: IProps) => {
             <>
                 {" "}
                 <Controller
-                    name={"name"}
+                    name={"namePL"}
                     control={control}
                     rules={{
                         required: "Podaj nazwę!",
                     }}
                     render={({ field }) => (
                         <TextField
-                            label="Nazwa sekcji"
+                            label="Nazwa sekcji PL"
+                            variant="outlined"
+                            size="small"
+                            type="text"
+                            error={Boolean(errors[field.name])}
+                            helperText={errors[field.name]?.message}
+                            fullWidth
+                            sx={{ mb: 3 }}
+                            {...field}
+                        />
+                    )}
+                />
+                <Controller
+                    name={"nameENG"}
+                    control={control}
+                    rules={{
+                        required: "Podaj nazwę!",
+                    }}
+                    render={({ field }) => (
+                        <TextField
+                            label="Nazwa sekcji ENG"
                             variant="outlined"
                             size="small"
                             type="text"

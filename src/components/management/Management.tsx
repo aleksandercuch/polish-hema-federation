@@ -61,6 +61,7 @@ const Management = () => {
     const [loading, setLoading] = useState(false);
     const currentUser = UserAuth();
     const t = useTranslations("NAVBAR");
+    const currentLocale = window.location.pathname.split("/")[1];
     const handleDeleteMember = async (
         section: sectionParams,
         member: memberParams,
@@ -84,7 +85,8 @@ const Management = () => {
                 index
             );
             await updateDoc(doc(db, "management", section.id), {
-                name: section.name,
+                namePL: section.namePL,
+                nameENG: section.nameENG,
                 members: updatedMembers,
             });
 
@@ -249,7 +251,9 @@ const Management = () => {
                                                         component="h3"
                                                         sx={{ mb: 5 }}
                                                     >
-                                                        {section.name}
+                                                        {currentLocale == "pl"
+                                                            ? section.namePL
+                                                            : section.nameENG}
                                                     </Typography>
                                                 </Grid>
                                             </Grid>
@@ -332,7 +336,7 @@ const Management = () => {
                                                     .map((member, index) => (
                                                         <Grid
                                                             item
-                                                            key={member.id}
+                                                            key={index}
                                                             container
                                                             xs={12}
                                                             md={6}
@@ -398,9 +402,10 @@ const Management = () => {
                                                                 </Grid>
                                                                 <Grid item>
                                                                     <Typography variant="body1">
-                                                                        {
-                                                                            member.descriptionPL
-                                                                        }
+                                                                        {currentLocale ==
+                                                                        "pl"
+                                                                            ? member.descriptionPL
+                                                                            : member.descriptionENG}
                                                                     </Typography>
                                                                 </Grid>
                                                             </Grid>

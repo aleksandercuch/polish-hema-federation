@@ -19,7 +19,8 @@ export interface contactParams {
 }
 
 export interface requestSectionParams {
-    name: string;
+    namePL: string;
+    nameENG: string;
     descriptionEng?: string | RawDraftContentState;
     descriptionPl?: string | RawDraftContentState;
     members: memberParams[] | string[];
@@ -30,7 +31,8 @@ export interface sectionParams extends requestSectionParams {
 
 export const defaultSection = {
     id: "",
-    name: "",
+    namePL: "",
+    nameENG: "",
     members: [],
 };
 
