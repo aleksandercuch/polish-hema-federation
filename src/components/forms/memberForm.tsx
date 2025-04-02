@@ -116,7 +116,8 @@ export const MemberForm = (props: IProps) => {
                 );
 
                 await updateDoc(doc(db, "management", props.section.id), {
-                    name: props.section.name,
+                    namePL: props.section.namePL,
+                    nameENG: props.section.nameENG,
                     members: updatedMembers,
                 });
 
@@ -125,7 +126,8 @@ export const MemberForm = (props: IProps) => {
                 sectionMembers.push(newMember);
 
                 await updateDoc(doc(db, "management", props.section.id), {
-                    name: props.section.name,
+                    namePL: props.section.namePL,
+                    nameENG: props.section.nameENG,
                     members: sectionMembers,
                 });
 
