@@ -29,7 +29,8 @@ import { arraysEqual } from "../../utils/array/arrayIsEqual";
 
 export interface sectionParams {
     id: string;
-    name: string;
+    nameENG: string;
+    namePL: string;
     members: memberParams[] | string[];
 }
 
@@ -112,7 +113,8 @@ const GalleryForm = (props: IProps) => {
                 : [];
 
             updateDoc(doc(db, props.collection, props.section.id), {
-                name: props.section.name,
+                namePL: props.section.namePL,
+                nameENG: props.section.nameENG,
                 members:
                     data.members.length > 0
                         ? updatedImages
@@ -137,7 +139,7 @@ const GalleryForm = (props: IProps) => {
             disabled={isSubmitting}
         >
             <Typography variant="h4" sx={{ mb: "10px" }}>
-                {props.section && <>Dodajesz zdjęcia {props.section.name}</>}
+                {props.section && <>Dodajesz zdjęcia {props.section.namePL}</>}
             </Typography>
 
             <>

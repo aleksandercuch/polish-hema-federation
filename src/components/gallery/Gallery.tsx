@@ -38,6 +38,7 @@ const Gallery = () => {
     const [mode, setMode] = useState<OPERATION_MODE>(OPERATION_MODE.None);
     const [loading, setLoading] = useState(false);
     const currentUser = UserAuth();
+    const currentLocale = window.location.pathname.split("/")[1];
 
     const handleEditImages = (section: sectionParams) => {
         setMode(OPERATION_MODE.Edit);
@@ -155,7 +156,9 @@ const Gallery = () => {
                                                 variant="h4"
                                                 component="h3"
                                             >
-                                                {section.name}
+                                                {currentLocale == "pl"
+                                                    ? section.namePL
+                                                    : section.nameENG}
                                             </Typography>
                                         </Grid>
                                     </Grid>
