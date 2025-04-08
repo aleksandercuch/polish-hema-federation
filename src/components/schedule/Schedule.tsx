@@ -51,20 +51,10 @@ export const Schedule = () => {
         try {
             const storage = getStorage();
             const fileRef = ref(storage, filePath);
+            const url = await getDownloadURL(fileRef);
 
-            const url: string = await getDownloadURL(fileRef);
-
-            if (!url) {
-                throw new Error("Failed to get download URL.");
-            }
-
-            const link: HTMLAnchorElement = document.createElement("a");
-            link.href = url;
-            link.target = "_blank";
-            link.download = filePath.split("/").pop() || "download.pdf";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            // iOS-compatible method
+            window.open(url, "_blank");
         } catch (error) {
             console.error("Error downloading file:", error);
         }

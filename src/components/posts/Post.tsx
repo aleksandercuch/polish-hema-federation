@@ -52,7 +52,7 @@ const Post = () => {
     const router = useRouter();
     const currentUser = UserAuth();
     const t = useTranslations("COMMON");
-    const currentLocale = window.location.pathname.split("/")[1];
+    const [currentLocale, setCurrentLocale] = useState("en");
 
     const deletePost = async () => {
         if (!post?.id) return;
@@ -132,7 +132,12 @@ const Post = () => {
             fetchPost();
         }
     }, [fetchPost, post]);
-
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const locale = window.location.pathname.split("/")[1];
+            setCurrentLocale(locale);
+        }
+    }, []);
     return (
         <Grid container className={styles.mainContainer}>
             <SubPageBanner />

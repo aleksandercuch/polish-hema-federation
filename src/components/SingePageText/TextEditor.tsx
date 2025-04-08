@@ -44,7 +44,7 @@ const TextEditorComponent = (props: pageParams) => {
     const [elements, setElements] = useState<editorParams | null>();
     const [isEditing, setIsEditing] = useState(false);
     const currentUser = UserAuth();
-    const currentLocale = window.location.pathname.split("/")[1];
+    const [currentLocale, setCurrentLocale] = useState("en");
 
     const form = useForm<editorParams>({
         defaultValues: {
@@ -118,6 +118,13 @@ const TextEditorComponent = (props: pageParams) => {
     useEffect(() => {
         fetchEditor();
     }, [fetchEditor]);
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const locale = window.location.pathname.split("/")[1];
+            setCurrentLocale(locale);
+        }
+    }, []);
+
     return (
         <>
             {currentUser?.user?.email && (
