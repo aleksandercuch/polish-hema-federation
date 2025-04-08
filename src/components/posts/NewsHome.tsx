@@ -35,6 +35,7 @@ import { usePost } from "@/contexts/PostsContext";
 
 // UTILS
 import colors from "@/utils/constants/colors";
+import { truncateText } from "@/utils/functions/TruncateText";
 
 export const NewsHome = () => {
     const [posts, setPosts] = useState<PostT[]>([]);
@@ -210,8 +211,14 @@ export const NewsHome = () => {
                                                         }}
                                                     >
                                                         {currentLocale == "pl"
-                                                            ? post.introPL
-                                                            : post.introENG}
+                                                            ? truncateText(
+                                                                  post.introPL,
+                                                                  100
+                                                              )
+                                                            : truncateText(
+                                                                  post.introENG,
+                                                                  100
+                                                              )}
                                                     </Typography>
                                                 </Grid>
                                                 <Grid item xs={6}>
