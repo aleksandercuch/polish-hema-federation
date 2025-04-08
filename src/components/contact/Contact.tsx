@@ -37,7 +37,7 @@ const Contact = (props: IProps) => {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
-    const currentLocale = window.location.pathname.split("/")[1];
+    const [currentLocale, setCurrentLocale] = useState("en");
     const currentUser = UserAuth();
 
     const deleteContact = async (data: contactParams) => {
@@ -97,6 +97,12 @@ const Contact = (props: IProps) => {
     useEffect(() => {
         fetchContact();
     }, [fetchContact]);
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const locale = window.location.pathname.split("/")[1];
+            setCurrentLocale(locale);
+        }
+    }, []);
 
     return (
         <Grid

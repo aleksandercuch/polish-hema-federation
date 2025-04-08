@@ -61,7 +61,8 @@ const Management = () => {
     const [loading, setLoading] = useState(false);
     const currentUser = UserAuth();
     const t = useTranslations("NAVBAR");
-    const currentLocale = window.location.pathname.split("/")[1];
+    const [currentLocale, setCurrentLocale] = useState("en");
+
     const handleDeleteMember = async (
         section: sectionParams,
         member: memberParams,
@@ -168,6 +169,13 @@ const Management = () => {
             setMemberToEdition(defaultMember);
         }
     }, [mode]);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const locale = window.location.pathname.split("/")[1];
+            setCurrentLocale(locale);
+        }
+    }, []);
     return (
         <Grid container className={styles.mainContainer} xs={12}>
             <SubPageBanner />

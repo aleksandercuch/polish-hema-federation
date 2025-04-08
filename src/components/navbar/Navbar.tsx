@@ -125,8 +125,10 @@ export const ResponsiveAppBar = () => {
     };
 
     useEffect(() => {
-        const currentLocale = window.location.pathname.split("/")[1];
-        setCurrentLocale(currentLocale);
+        if (typeof window !== "undefined") {
+            const locale = window.location.pathname.split("/")[1];
+            setCurrentLocale(locale);
+        }
     }, []);
     return (
         <AppBar

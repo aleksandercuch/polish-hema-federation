@@ -42,7 +42,7 @@ export const NewsHome = () => {
     const router = useRouter();
     const theme = useTheme();
     const t = useTranslations("COMMON");
-    const currentLocale = window.location.pathname.split("/")[1];
+    const [currentLocale, setCurrentLocale] = useState("en");
     const isReversedPost = (index: number) => {
         return index == 2 || index == 3 ? true : false;
     };
@@ -82,6 +82,10 @@ export const NewsHome = () => {
 
     useEffect(() => {
         fetchPosts();
+        if (typeof window !== "undefined") {
+            const locale = window.location.pathname.split("/")[1];
+            setCurrentLocale(locale);
+        }
     }, []);
 
     return (
