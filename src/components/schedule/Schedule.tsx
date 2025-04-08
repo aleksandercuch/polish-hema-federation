@@ -53,8 +53,8 @@ export const Schedule = () => {
             const fileRef = ref(storage, filePath);
             const url = await getDownloadURL(fileRef);
 
-            // iOS-compatible method
-            window.open(url, "_blank");
+            // Try this method on iOS
+            window.location.href = url; // Opens the link in the same window/tab
         } catch (error) {
             console.error("Error downloading file:", error);
         }
