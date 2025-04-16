@@ -49,6 +49,10 @@ export default async function RootLayout({
             <head>
                 <link rel="icon" href="/favicon.ico" sizes="any" />
                 <link rel="icon" type="image/png" href="/favicon.png" />
+                <meta
+                    name="description"
+                    content="The Polish HEMA Federation is a sports organization established to professionalize historical fencing in Poland. We organize the Polish HEMA League – a flagship, year-round tournament series that attracts the best of the best. We train referees, support and organize events related to historical reenactment and other tournaments, assist beginner clubs, and promote our sport and martial art."
+                ></meta>
             </head>
             <body>
                 <NextIntlClientProvider messages={messages}>

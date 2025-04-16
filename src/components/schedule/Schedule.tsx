@@ -47,23 +47,6 @@ export const Schedule = () => {
         }
     };
 
-    const downloadSchedule = async (filePath: string) => {
-        try {
-            const storage = getStorage();
-            const fileRef = ref(storage, filePath);
-            const url = await getDownloadURL(fileRef);
-
-            // Try this method on iOS
-            window.location.href = url; // Opens the link in the same window/tab
-        } catch (error) {
-            console.error("Error downloading file:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchSchedule();
-    }, []);
-
     return (
         <Card
             className={styles.schedule}
@@ -126,15 +109,19 @@ export const Schedule = () => {
                                 )}
                                 {schedule && (
                                     <Grid item xs={6}>
-                                        <Button
-                                            variant="outlined"
-                                            color="error"
-                                            onClick={() =>
-                                                downloadSchedule(schedule)
-                                            }
+                                        <a
+                                            href={schedule}
+                                            download
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                         >
-                                            Pokaż Harmonogram
-                                        </Button>
+                                            <Button
+                                                variant="outlined"
+                                                color="error"
+                                            >
+                                                Pokaż Harmonogram
+                                            </Button>
+                                        </a>
                                     </Grid>
                                 )}
                             </Grid>

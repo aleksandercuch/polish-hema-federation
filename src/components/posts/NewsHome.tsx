@@ -47,7 +47,7 @@ export const NewsHome = () => {
     const isReversedPost = (index: number) => {
         return index == 2 || index == 3 ? true : false;
     };
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("lg"));
     const handleNavigation = (post: PostT) => {
         setPost(post);
         router.push(`${currentLocale}/posts/${post.id}`);
@@ -96,8 +96,8 @@ export const NewsHome = () => {
             className={styles.news}
             justifyContent={"center"}
             sx={{
-                maxHeight: { md: "100vh", xs: "none" },
-                marginTop: { md: "100vh", xs: "35vh" },
+                maxHeight: { lg: "100vh", xs: "none" },
+                marginTop: { lg: "100vh", xs: "35vh" },
             }}
         >
             {posts.length > 0 ? (
@@ -106,7 +106,7 @@ export const NewsHome = () => {
                         <Grid
                             item
                             xs={12}
-                            md={
+                            lg={
                                 posts.length != 6 &&
                                 posts.length % 2 != 0 &&
                                 index == posts.length - 1
@@ -130,7 +130,7 @@ export const NewsHome = () => {
                                 sx={{
                                     display: { sm: "flex", xs: "block" },
                                     flexDirection: {
-                                        md: isReversedPost(index)
+                                        lg: isReversedPost(index)
                                             ? "row-reverse"
                                             : "row",
                                         xs:
@@ -148,7 +148,7 @@ export const NewsHome = () => {
                                         width: { sm: "50%", xs: "100%" },
                                         alignContent: "center",
                                         backgroundColor: {
-                                            md: isReversedPost(index)
+                                            lg: isReversedPost(index)
                                                 ? `${colors.red}`
                                                 : `${colors.white}`,
                                             xs:
