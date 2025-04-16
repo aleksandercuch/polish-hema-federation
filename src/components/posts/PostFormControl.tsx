@@ -194,7 +194,7 @@ const PostFormControl = (props: IProps) => {
                     mainFile: mainFileUrl,
                     images:
                         updatedImages.length > 0 ? updatedImages : post.images,
-                    date: new Date(),
+                    date: data.date || new Date(),
                 };
 
                 if (isEditMode && postRef) {
