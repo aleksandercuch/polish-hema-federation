@@ -15,7 +15,7 @@ import Button from "@mui/material/Button";
 import styles from "./schedule.module.css";
 
 // FIREBASE
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { ref, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../firebase/config/clientApp";
 
 // COMPONENTS
@@ -46,6 +46,10 @@ export const Schedule = () => {
             console.error("Error getting file:", error);
         }
     };
+
+    useEffect(() => {
+        fetchSchedule();
+    }, []);
 
     return (
         <Card
