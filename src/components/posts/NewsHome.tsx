@@ -96,7 +96,7 @@ export const NewsHome = () => {
             className={styles.news}
             justifyContent={"center"}
             sx={{
-                maxHeight: { lg: "100vh", xs: "none" },
+                maxHeight: { xs: "none" },
                 marginTop: { lg: "100vh", xs: "35vh" },
             }}
         >
