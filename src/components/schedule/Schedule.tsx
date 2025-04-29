@@ -87,8 +87,7 @@ export const Schedule = () => {
                     >
                         <Grid item>
                             <Typography component="div" variant="h5">
-                                Harmonogram Zawodów{" "}
-                                {dayjs(new Date()).format("YYYY")}
+                                Harmonogram {dayjs(new Date()).format("YYYY")}
                             </Typography>
                         </Grid>
                         {!editMode ? (
