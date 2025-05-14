@@ -139,7 +139,7 @@ export const ResponsiveAppBar = () => {
                 <Toolbar disableGutters>
                     <Link href={`/${currentLocale}`}>
                         <Image
-                            src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/Logo.jpg?alt=media&token=be8db20e-c749-49bd-82cc-2ed577a69c57"
+                            src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/NewLogo.png?alt=media&token=4e46d858-5a34-4b28-a58c-def60ec3fa2b"
                             alt="Example image"
                             width={100}
                             height={100}
