@@ -24,6 +24,8 @@ import {
     deleteDoc,
     doc,
     getDocs,
+    orderBy,
+    query,
     updateDoc,
 } from "firebase/firestore";
 
@@ -147,9 +149,9 @@ const Management = () => {
     };
 
     const fetchSections = async () => {
-        const managementCollection = collection(db, "management");
+        const q = query(collection(db, "management"), orderBy("date", "desc"));
 
-        getDocs(managementCollection)
+        getDocs(q)
             .then((querySnapshot) => {
                 const dataArray = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
