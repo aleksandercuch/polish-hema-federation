@@ -114,20 +114,23 @@ export const MemberForm = (props: IProps) => {
                     props.member.id,
                     newMember
                 );
-
+                console.log(props.section, "1");
                 await updateDoc(doc(db, "management", props.section.id), {
                     namePL: props.section.namePL,
                     nameENG: props.section.nameENG,
+                    sectionPlace: props.section.sectionPlace,
                     members: updatedMembers,
                 });
 
                 alert(`Zakończyłeś edycję ${data.name}!`);
             } else {
                 sectionMembers.push(newMember);
+                console.log(props.section, "2");
 
                 await updateDoc(doc(db, "management", props.section.id), {
                     namePL: props.section.namePL,
                     nameENG: props.section.nameENG,
+                    sectionPlace: props.section.sectionPlace,
                     members: sectionMembers,
                 });
 
