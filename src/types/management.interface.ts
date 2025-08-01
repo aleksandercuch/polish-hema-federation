@@ -24,6 +24,7 @@ export interface requestSectionParams {
     descriptionEng?: string | RawDraftContentState;
     descriptionPl?: string | RawDraftContentState;
     members: memberParams[] | string[];
+    sectionPlace: number;
 }
 export interface sectionParams extends requestSectionParams {
     id: string;
@@ -34,6 +35,7 @@ export const defaultSection = {
     namePL: "",
     nameENG: "",
     members: [],
+    sectionPlace: 100,
 };
 
 export const defaultMember = {

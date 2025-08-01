@@ -115,6 +115,31 @@ const Management = () => {
         setMemberToEdition(member);
     };
 
+    const handleMoveSection = async (
+        section: sectionParams,
+        sectionToChange: sectionParams
+    ) => {
+        try {
+            await Promise.all([
+                updateDoc(doc(db, "management", section.id), {
+                    namePL: section.namePL,
+                    nameENG: section.nameENG,
+                    members: section.members,
+                    sectionPlace: sectionToChange.sectionPlace,
+                }),
+                updateDoc(doc(db, "management", sectionToChange.id), {
+                    namePL: sectionToChange.namePL,
+                    nameENG: sectionToChange.nameENG,
+                    members: sectionToChange.members,
+                    sectionPlace: section.sectionPlace,
+                }),
+            ]);
+            fetchSections();
+        } catch (error) {
+            alert("An error occurred while updating sections: " + error);
+        }
+    };
+
     const handleDeleteSection = async (section: sectionParams) => {
         if (!section.id) return;
 
@@ -149,7 +174,10 @@ const Management = () => {
     };
 
     const fetchSections = async () => {
-        const q = query(collection(db, "management"), orderBy("date", "desc"));
+        const q = query(
+            collection(db, "management"),
+            orderBy("sectionPlace", "asc")
+        );
 
         getDocs(q)
             .then((querySnapshot) => {
@@ -227,7 +255,7 @@ const Management = () => {
                         >
                             {mode === OPERATION_MODE.None ? (
                                 <>
-                                    {sectionsList.map((section) => (
+                                    {sectionsList.map((section, index) => (
                                         <Grid
                                             item
                                             key={section.id}
@@ -335,6 +363,58 @@ const Management = () => {
                                                             Usuń sekcję
                                                         </Button>
                                                     </Grid>
+                                                    {section.sectionPlace >
+                                                        1 && (
+                                                        <Grid item>
+                                                            <Button
+                                                                type="submit"
+                                                                color="error"
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    mb: 2,
+                                                                    mt: 2,
+                                                                }}
+                                                                onClick={() =>
+                                                                    handleMoveSection(
+                                                                        section,
+                                                                        sectionsList[
+                                                                            index -
+                                                                                1
+                                                                        ]
+                                                                    )
+                                                                }
+                                                            >
+                                                                Przesuń do góry
+                                                            </Button>
+                                                        </Grid>
+                                                    )}
+                                                    {section.sectionPlace <
+                                                        sectionsList.length && (
+                                                        <Grid item>
+                                                            <Button
+                                                                type="submit"
+                                                                color="error"
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    mb: 2,
+                                                                    mt: 2,
+                                                                }}
+                                                                onClick={() =>
+                                                                    handleMoveSection(
+                                                                        section,
+                                                                        sectionsList[
+                                                                            index +
+                                                                                1
+                                                                        ]
+                                                                    )
+                                                                }
+                                                            >
+                                                                Przesuń w dół
+                                                            </Button>
+                                                        </Grid>
+                                                    )}
                                                 </Grid>
                                             )}
                                             {section.members &&
@@ -536,6 +616,10 @@ const Management = () => {
                                                         collection={
                                                             "management"
                                                         }
+                                                        sectionPlace={
+                                                            sectionsList.length +
+                                                            1
+                                                        }
                                                     />
                                                 </>
                                             )}
@@ -576,6 +660,9 @@ const Management = () => {
                                                             "management"
                                                         }
                                                         setLoading={setLoading}
+                                                        sectionPlace={
+                                                            sectionToEdition.sectionPlace
+                                                        }
                                                     />
                                                 </>
                                             )}

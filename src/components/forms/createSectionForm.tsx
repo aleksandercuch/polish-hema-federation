@@ -26,6 +26,7 @@ export interface sectionParams {
     namePL: string;
     nameENG: string;
     members: memberParams[] | string[];
+    sectionPlace: number;
 }
 
 interface IProps {
@@ -35,6 +36,7 @@ interface IProps {
     loading: boolean;
     setLoading: Dispatch<SetStateAction<boolean>>;
     collection: string;
+    sectionPlace: number;
 }
 
 const CreateSectionForm = (props: IProps) => {
@@ -43,6 +45,9 @@ const CreateSectionForm = (props: IProps) => {
             namePL: props.section ? props.section.namePL : "",
             nameENG: props.section ? props.section.nameENG : "",
             members: props.section ? props.section.members : [],
+            sectionPlace: props.section
+                ? props.section.sectionPlace
+                : props.sectionPlace,
         },
     });
 
@@ -61,6 +66,7 @@ const CreateSectionForm = (props: IProps) => {
                 namePL: data.namePL,
                 nameENG: data.nameENG,
                 members: props.section.members,
+                sectionPlace: props.section.sectionPlace,
             })
                 .then(() => {
                     alert(`Zakończyłeś edycję ${data.namePL}!`);
@@ -75,6 +81,7 @@ const CreateSectionForm = (props: IProps) => {
             addDoc(collection(db, props.collection), {
                 namePL: data.namePL,
                 nameENG: data.nameENG,
+                sectionPlace: data.sectionPlace,
                 members: [],
             }).then(() => {
                 alert("Stworzyłeś nową sekcję!");
