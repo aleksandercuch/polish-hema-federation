@@ -36,7 +36,7 @@ interface IProps {
     loading: boolean;
     setLoading: Dispatch<SetStateAction<boolean>>;
     collection: string;
-    sectionPlace: number;
+    sectionPlace?: number;
 }
 
 const CreateSectionForm = (props: IProps) => {
