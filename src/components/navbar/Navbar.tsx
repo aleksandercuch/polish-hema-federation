@@ -50,6 +50,12 @@ export const ResponsiveAppBar = () => {
             ref: "Schedule",
         },
         {
+            name: t("articles"),
+            isReflink: true,
+            url: `/${currentLocale}`,
+            ref: "Articles",
+        },
+        {
             name: t("rules"),
             isReflink: false,
             url: `/${currentLocale}/rules`,

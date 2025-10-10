@@ -1,9 +1,9 @@
-import Post from "@/components/posts/Post";
+import Article from "@/components/articles/Article";
 
 const Page = () => {
     return (
         <>
-            <Post />
+            <Article />
         </>
     );
 };

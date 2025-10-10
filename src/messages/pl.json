@@ -1,6 +1,7 @@
 {
     "NAVBAR": {
         "news": "Nowości",
+        "articles": "Artykuły",
         "schedule": "Harmonogram",
         "rules": "Regulamin",
         "management": "Władze",
@@ -13,9 +14,11 @@
     "COMMON": {
         "show-more": "Pokaż więcej",
         "show-all-posts": "Wszystkie Posty",
+        "show-all-articles": "Wszystkie Artykuły",
         "show-schedule": "Pokaż Harmonogram",
         "polish-clubs": "Kluby w Polsce",
         "posts": "Posty",
+        "articles": "Artykuły",
         "schedule": "Harmonogram Zawodów"
     }
 }
