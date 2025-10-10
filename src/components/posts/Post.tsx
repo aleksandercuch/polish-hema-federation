@@ -84,7 +84,7 @@ const Post = () => {
 
             await deleteDoc(doc(db, "posts", post.id));
             alert("Post został usunięty.");
-            router.push(`/posts`);
+            router.push(`/${currentLocale}/posts`);
             // setPost(defaultPostValues);
         } catch (error) {
             console.error("Błąd podczas usuwania posta:", error);
