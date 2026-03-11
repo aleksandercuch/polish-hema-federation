@@ -1,149 +1,191 @@
 // CORE
 "use client";
-import { ComponentType, FC, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { convertFromRaw, EditorState, RawDraftContentState } from "draft-js";
-//import { UserAuth } from "@/context/auth-context";
-import dynamic from "next/dynamic";
-import { EditorProps } from "react-draft-wysiwyg";
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+
 // ASSETES
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import {
     Avatar,
     Button,
-    FormControl,
+    Divider,
     Grid,
     Paper,
     Typography,
-    TextField,
 } from "@mui/material";
-import styles from "@/app/subpage.module.css";
-import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
-import EmailIcon from "@mui/icons-material/Email";
-import { MuiFileInput } from "mui-file-input";
-
-// @ts-ignore
-import draftToHtml from "draftjs-to-html";
+import styles from "@/app/[locale]/subpage.module.css";
+import colors from "@/utils/constants/colors";
 
 //FIREBASE
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { deleteObject, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase/config/clientApp";
 import {
-    addDoc,
     collection,
+    deleteDoc,
     doc,
     getDocs,
+    orderBy,
+    query,
     updateDoc,
 } from "firebase/firestore";
 
 // COMPONENTS
 import { SubPageBanner } from "@/components/banner/SubPageBanner";
+import { Loader } from "../loader/loader";
 
-interface contactParams {
-    id: string;
-    name: string;
-    descriptionENG: string;
-    descriptionPL: string;
-    file: any;
-    phone: string;
-    email: string;
-}
+// TYPES
+import {
+    defaultMember,
+    defaultSection,
+    memberParams,
+    sectionParams,
+} from "@/types/management.interface";
+import { isMemberParams } from "@/types/typeGuards/isMemberParams";
+
+// UTILS
+import { removeElementAtIndex } from "@/utils/array/deleteWithIndex";
+import { MemberForm } from "@/components/forms/memberForm";
+import { fileExists } from "@/utils/storage/fileExistInStorage";
+import { DEFAULT_AVATAR } from "@/utils/constants/constants";
+import CreateSectionForm from "@/components/forms/createSectionForm";
+import { OPERATION_MODE } from "@/utils/constants/operationModeEnum";
+
+//CONTEXT
+import { UserAuth } from "@/contexts/AuthContext";
 
 const Management = () => {
-    const [contactList, setContactList] = useState<contactParams[]>([]);
-    const [contactToEdition, setContactToEdition] = useState<contactParams>();
+    const [sectionsList, setSectionsList] = useState<sectionParams[]>([]);
+    const [sectionToEdition, setSectionToEdition] =
+        useState<sectionParams>(defaultSection);
+    const [memberToEdition, setMemberToEdition] =
+        useState<memberParams>(defaultMember);
+    const [mode, setMode] = useState<OPERATION_MODE>(OPERATION_MODE.None);
+    const [loading, setLoading] = useState(false);
+    const currentUser = UserAuth();
+    const t = useTranslations("NAVBAR");
+    const [currentLocale, setCurrentLocale] = useState("en");
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [isAdding, setIsAdding] = useState(false);
+    const handleDeleteMember = async (
+        section: sectionParams,
+        member: memberParams,
+        index: number
+    ) => {
+        if (!section.id) return;
 
-    const form = useForm<contactParams>({
-        defaultValues: {
-            name: "",
-            descriptionENG: "",
-            descriptionPL: "",
-            phone: "",
-            email: "",
-            file: undefined,
-        },
-    });
+        const confirmDelete = window.confirm(
+            `Czy na pewno chcesz usunąć ${member.name}?`
+        );
+        if (!confirmDelete) return;
+        setLoading(true);
 
-    const {
-        control,
-        handleSubmit,
-        reset,
-        formState: { isSubmitting, errors, isValid, isSubmitted },
-    } = form;
+        try {
+            if (member.file && (await fileExists(member.file as string))) {
+                await deleteObject(ref(storage, member.file as string));
+            }
 
-    const submitForm = (data: contactParams) => {
-        if (contactToEdition) {
-            const storageRef = ref(storage, `postsImages/${data.file.name}`);
-            uploadBytes(storageRef, data.file).then(async (snapshot) => {
-                const downloadURL = await getDownloadURL(snapshot.ref);
-                updateDoc(doc(db, "contact", contactToEdition.id), {
-                    descriptionPL: data.descriptionPL,
-                    descriptionENG: data.descriptionENG,
-                    name: data.name,
-                    phone: data.phone,
-                    email: data.email,
-                    file: downloadURL,
-                })
-                    .then(() => {
-                        alert(`Zakończyłeś edycję ${data.name}!`);
-                        setContactToEdition(undefined);
-                        setIsEditing(false);
-                        //  fetchRules();
-                    })
-                    .catch((error) => {
-                        alert(error);
-                    });
+            const updatedMembers = removeElementAtIndex(
+                section.members as memberParams[],
+                index
+            );
+            await updateDoc(doc(db, "management", section.id), {
+                namePL: section.namePL,
+                nameENG: section.nameENG,
+                members: updatedMembers,
             });
-        } else {
-            const storageRef = ref(storage, `contactImages/${data.file.name}`);
 
-            uploadBytes(storageRef, data.file)
-                .then(async (snapshot) => {
-                    const downloadURL = await getDownloadURL(snapshot.ref);
-                    addDoc(collection(db, "contact"), {
-                        descriptionPL: data.descriptionPL,
-                        descriptionENG: data.descriptionENG,
-                        name: data.name,
-                        phone: data.phone,
-                        email: data.email,
-                        file: downloadURL,
-                    }).then(() => {
-                        alert("Stworzyłeś nowy kontakt!");
-                        setContactToEdition(undefined);
-                        setIsEditing(false);
-                        reset();
-                    });
-                })
-                .catch((error) => {
-                    alert(error);
-                });
+            alert(`Zakończyłeś usuwanie!`);
+            fetchSections().then(() => setLoading(false));
+        } catch (error) {
+            alert(`Wystąpił ${error} podczas usuwania ${member.name}`);
+        }
+    };
+    const handleAddMember = (section: sectionParams) => {
+        setMode(OPERATION_MODE.Add);
+        setSectionToEdition(section);
+    };
+
+    const handleEditSection = (section: sectionParams) => {
+        setMode(OPERATION_MODE.Edit);
+        setSectionToEdition(section);
+    };
+
+    const handleEditMember = (section: sectionParams, member: memberParams) => {
+        setMode(OPERATION_MODE.Edit);
+        setSectionToEdition(section);
+        setMemberToEdition(member);
+    };
+
+    const handleMoveSection = async (
+        section: sectionParams,
+        sectionToChange: sectionParams
+    ) => {
+        try {
+            await Promise.all([
+                updateDoc(doc(db, "management", section.id), {
+                    namePL: section.namePL,
+                    nameENG: section.nameENG,
+                    members: section.members,
+                    sectionPlace: sectionToChange.sectionPlace,
+                }),
+                updateDoc(doc(db, "management", sectionToChange.id), {
+                    namePL: sectionToChange.namePL,
+                    nameENG: sectionToChange.nameENG,
+                    members: sectionToChange.members,
+                    sectionPlace: section.sectionPlace,
+                }),
+            ]);
+            fetchSections();
+        } catch (error) {
+            alert("An error occurred while updating sections: " + error);
         }
     };
 
-    const editContact = (data: contactParams) => {
-        setContactToEdition(data);
-        setIsEditing(true);
+    const handleDeleteSection = async (section: sectionParams) => {
+        if (!section.id) return;
+
+        const confirmDelete = window.confirm(
+            "Czy na pewno chcesz usunąć tą sekcję?"
+        );
+        if (!confirmDelete) return;
+        setLoading(true);
+        try {
+            if (section.members && section.members.length > 0) {
+                const members = section.members as memberParams[];
+                await Promise.all(
+                    members.filter(isMemberParams).map(async (member) => {
+                        if (await fileExists(member.file as string)) {
+                            await deleteObject(
+                                ref(storage, member.file as string)
+                            );
+                        }
+                    })
+                );
+            }
+
+            await deleteDoc(doc(db, "management", section.id)).then(() => {
+                fetchSections();
+                alert("Sekcja została usunięta.");
+            });
+            setLoading(false);
+        } catch (error) {
+            console.error("Błąd podczas usuwania posta:", error);
+            alert("Wystąpił błąd podczas usuwania posta.");
+        }
     };
 
-    const closeAdminPanel = () => {
-        contactToEdition && setContactToEdition(undefined);
-        setIsAdding(false);
-        setIsEditing(false);
-    };
+    const fetchSections = async () => {
+        const q = query(
+            collection(db, "management"),
+            orderBy("sectionPlace", "asc")
+        );
 
-    const fetchContact = async () => {
-        const contactCollection = collection(db, "contact");
-
-        getDocs(contactCollection)
+        getDocs(q)
             .then((querySnapshot) => {
                 const dataArray = querySnapshot.docs.map((doc) => ({
-                    id: doc.data().id,
-                    ...doc.data(), // Spread the document data
-                }));
-                setContactList(dataArray); // Logs the collection as an array
+                    id: doc.id,
+                    ...doc.data(),
+                })); //@ts-expect-error: temporary solution
+                setSectionsList(dataArray);
             })
             .catch((error) => {
                 console.error("Error retrieving collection: ", error);
@@ -151,11 +193,41 @@ const Management = () => {
     };
 
     useEffect(() => {
-        fetchContact();
+        if (mode === OPERATION_MODE.None) {
+            fetchSections();
+            setSectionToEdition(defaultSection);
+            setMemberToEdition(defaultMember);
+        }
+    }, [mode]);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const locale = window.location.pathname.split("/")[1];
+            setCurrentLocale(locale);
+        }
     }, []);
     return (
         <Grid container className={styles.mainContainer} xs={12}>
             <SubPageBanner />
+            <Grid
+                item
+                xs={12}
+                sx={{
+                    textAlign: "center",
+                    width: "100%",
+                    backgroundColor: `${colors.red}`,
+                    position: "relative",
+                    top: "35vh",
+                }}
+            >
+                <Typography
+                    variant="h3"
+                    sx={{ padding: "30px 0", color: `${colors.white}` }}
+                >
+                    {t("management")}
+                </Typography>
+                <Divider />
+            </Grid>
             <Paper className={styles.subpageContainer}>
                 <Grid
                     container
@@ -166,339 +238,440 @@ const Management = () => {
                         maxWidth: "none",
                         padding: "0 5px",
                     }}
-                    spacing={8}
                     xs={12}
                 >
-                    <Grid item xs={12} sx={{ textAlign: "center" }}>
-                        <Typography variant="h3">Skład Zarządu</Typography>
-                    </Grid>
-                    <Grid
-                        item
-                        container
-                        xs={12}
-                        sm={8}
-                        spacing={4}
-                        sx={{ justifyContent: "center" }}
-                    >
-                        {!isAdding && !isEditing && contactList.length ? (
-                            <>
-                                {contactList.map((element) => (
-                                    <Grid
-                                        item
-                                        key={element.phone}
-                                        container
-                                        xs={12}
-                                        md={6}
-                                        sx={{
-                                            paddingBottom: "40px",
-                                            textAlign: {
-                                                xs: "center",
-                                                sm: "left",
-                                            },
-                                        }}
-                                        spacing={2}
-                                    >
-                                        <Grid item xs={12} lg={4}>
-                                            <Avatar
-                                                alt="Remy Sharp"
-                                                src={
-                                                    element.image ||
-                                                    "/static/images/avatar/1.jpg"
-                                                }
-                                                sx={{
-                                                    width: 156,
-                                                    height: 156,
-                                                    margin: "auto",
-                                                }}
-                                            />
-                                        </Grid>
+                    {loading ? (
+                        <Grid item>
+                            <Loader />
+                        </Grid>
+                    ) : (
+                        <Grid
+                            item
+                            container
+                            xs={12}
+                            sm={8}
+                            spacing={4}
+                            sx={{ justifyContent: "center" }}
+                        >
+                            {mode === OPERATION_MODE.None ? (
+                                <>
+                                    {sectionsList.map((section, index) => (
                                         <Grid
                                             item
-                                            container
-                                            xs={12}
-                                            lg={8}
-                                            spacing={2}
-                                        >
-                                            <Grid item xs={12}>
-                                                <Typography
-                                                    variant="h5"
-                                                    component="h4"
-                                                >
-                                                    {element.name}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Typography variant="body1">
-                                                    {element.descriptionPL}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item container xs={12}>
-                                                <Grid item container xs={6}>
-                                                    <Grid item xs={2}>
-                                                        <LocalPhoneIcon />
-                                                    </Grid>
-                                                    <Grid item xs={10}>
-                                                        <Typography variant="body1">
-                                                            {element.phone}
-                                                        </Typography>
-                                                    </Grid>
-                                                </Grid>
-                                                <Grid item container xs={6}>
-                                                    <Grid item xs={2}>
-                                                        <EmailIcon />
-                                                    </Grid>
-                                                    <Grid item xs={10}>
-                                                        <Typography variant="body1">
-                                                            {element.email}
-                                                        </Typography>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                        <Grid
-                                            item
+                                            key={section.id}
                                             container
                                             xs={12}
                                             sx={{
+                                                paddingBottom: "40px",
+                                                textAlign: {
+                                                    xs: "center",
+                                                    sm: "left",
+                                                },
                                                 justifyContent: "center",
                                             }}
+                                            spacing={2}
+                                        >
+                                            <Grid
+                                                item
+                                                container
+                                                xs={12}
+                                                spacing={2}
+                                            >
+                                                <Grid
+                                                    item
+                                                    xs={12}
+                                                    sx={{
+                                                        textAlign: "center",
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="h4"
+                                                        component="h3"
+                                                        sx={{ mb: 5 }}
+                                                    >
+                                                        {currentLocale == "pl"
+                                                            ? section.namePL
+                                                            : section.nameENG}
+                                                    </Typography>
+                                                </Grid>
+                                            </Grid>
+                                            {currentUser?.user?.email && (
+                                                <Grid
+                                                    item
+                                                    container
+                                                    xs={12}
+                                                    sx={{
+                                                        justifyContent:
+                                                            "center",
+                                                    }}
+                                                    spacing={2}
+                                                >
+                                                    <Grid item>
+                                                        <Button
+                                                            type="submit"
+                                                            color="error"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            sx={{
+                                                                mb: 2,
+                                                                mt: 2,
+                                                            }}
+                                                            onClick={() =>
+                                                                handleEditSection(
+                                                                    section
+                                                                )
+                                                            }
+                                                        >
+                                                            Edytuj nazwę
+                                                        </Button>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Button
+                                                            type="submit"
+                                                            color="error"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            sx={{
+                                                                mb: 2,
+                                                                mt: 2,
+                                                            }}
+                                                            onClick={() =>
+                                                                handleAddMember(
+                                                                    section
+                                                                )
+                                                            }
+                                                        >
+                                                            Dodaj Osobę
+                                                        </Button>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Button
+                                                            type="submit"
+                                                            color="error"
+                                                            variant="contained"
+                                                            size="small"
+                                                            sx={{
+                                                                mb: 2,
+                                                                mt: 2,
+                                                            }}
+                                                            onClick={() =>
+                                                                handleDeleteSection(
+                                                                    section
+                                                                )
+                                                            }
+                                                        >
+                                                            Usuń sekcję
+                                                        </Button>
+                                                    </Grid>
+                                                    {section.sectionPlace >
+                                                        1 && (
+                                                        <Grid item>
+                                                            <Button
+                                                                type="submit"
+                                                                color="error"
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    mb: 2,
+                                                                    mt: 2,
+                                                                }}
+                                                                onClick={() =>
+                                                                    handleMoveSection(
+                                                                        section,
+                                                                        sectionsList[
+                                                                            index -
+                                                                                1
+                                                                        ]
+                                                                    )
+                                                                }
+                                                            >
+                                                                Przesuń do góry
+                                                            </Button>
+                                                        </Grid>
+                                                    )}
+                                                    {section.sectionPlace <
+                                                        sectionsList.length && (
+                                                        <Grid item>
+                                                            <Button
+                                                                type="submit"
+                                                                color="error"
+                                                                variant="outlined"
+                                                                size="small"
+                                                                sx={{
+                                                                    mb: 2,
+                                                                    mt: 2,
+                                                                }}
+                                                                onClick={() =>
+                                                                    handleMoveSection(
+                                                                        section,
+                                                                        sectionsList[
+                                                                            index +
+                                                                                1
+                                                                        ]
+                                                                    )
+                                                                }
+                                                            >
+                                                                Przesuń w dół
+                                                            </Button>
+                                                        </Grid>
+                                                    )}
+                                                </Grid>
+                                            )}
+                                            {section.members &&
+                                                Array.isArray(
+                                                    section.members
+                                                ) &&
+                                                section.members //  @ts-expect-error: temporary solution
+                                                    .filter(isMemberParams)
+                                                    .map((member, index) => (
+                                                        <Grid
+                                                            item
+                                                            key={index}
+                                                            container
+                                                            xs={12}
+                                                            md={6}
+                                                            sx={{
+                                                                paddingBottom:
+                                                                    "40px",
+                                                                textAlign: {
+                                                                    xs: "center",
+                                                                    sm: "left",
+                                                                },
+                                                            }}
+                                                            spacing={2}
+                                                        >
+                                                            <Grid
+                                                                item
+                                                                xs={12}
+                                                                lg={4}
+                                                            >
+                                                                <Avatar
+                                                                    alt="Remy Sharp"
+                                                                    src={
+                                                                        (member.file as string) ||
+                                                                        DEFAULT_AVATAR
+                                                                    }
+                                                                    sx={{
+                                                                        width: 120,
+                                                                        height: 120,
+                                                                        margin: "auto",
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                            <Grid
+                                                                item
+                                                                container
+                                                                xs={12}
+                                                                lg={8}
+                                                                spacing={2}
+                                                                sx={{
+                                                                    justifyContent:
+                                                                        {
+                                                                            xs: "center",
+                                                                            lg: "flex-start",
+                                                                        },
+
+                                                                    textAlign: {
+                                                                        xs: "center",
+                                                                        lg: "left",
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <Grid
+                                                                    item
+                                                                    xs={12}
+                                                                >
+                                                                    <Typography
+                                                                        variant="h5"
+                                                                        component="h4"
+                                                                    >
+                                                                        {
+                                                                            member.name
+                                                                        }
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <Typography variant="body1">
+                                                                        {currentLocale ==
+                                                                        "pl"
+                                                                            ? member.descriptionPL
+                                                                            : member.descriptionENG}
+                                                                    </Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                            {currentUser?.user
+                                                                ?.email && (
+                                                                <Grid
+                                                                    item
+                                                                    container
+                                                                    xs={12}
+                                                                    sx={{
+                                                                        justifyContent:
+                                                                            "center",
+                                                                    }}
+                                                                    spacing={2}
+                                                                >
+                                                                    <Grid item>
+                                                                        <Button
+                                                                            type="submit"
+                                                                            color="error"
+                                                                            variant="outlined"
+                                                                            size="small"
+                                                                            sx={{
+                                                                                mb: 2,
+                                                                                mt: 2,
+                                                                            }}
+                                                                            onClick={() =>
+                                                                                handleEditMember(
+                                                                                    section,
+                                                                                    member
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Edytuj{" "}
+                                                                            {
+                                                                                member.name
+                                                                            }
+                                                                        </Button>
+                                                                    </Grid>
+                                                                    <Grid item>
+                                                                        <Button
+                                                                            type="submit"
+                                                                            color="error"
+                                                                            variant="contained"
+                                                                            size="small"
+                                                                            sx={{
+                                                                                mb: 2,
+                                                                                mt: 2,
+                                                                            }}
+                                                                            onClick={() =>
+                                                                                handleDeleteMember(
+                                                                                    section,
+                                                                                    member,
+                                                                                    index
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Usuń
+                                                                        </Button>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            )}
+                                                        </Grid>
+                                                    ))}
+                                        </Grid>
+                                    ))}
+                                    {currentUser?.user?.email && (
+                                        <Grid
+                                            item
+                                            container
+                                            xs={12}
+                                            sx={{ paddingBottom: "40px" }}
                                         >
                                             <Button
+                                                fullWidth
                                                 type="submit"
-                                                color="error"
                                                 variant="outlined"
+                                                color="error"
                                                 size="small"
-                                                sx={{ mb: 2, mt: 2 }}
+                                                sx={{ mb: 2 }}
                                                 onClick={() =>
-                                                    editContact(element)
+                                                    setMode(OPERATION_MODE.Add)
                                                 }
                                             >
-                                                Edytuj {element.name}
+                                                Dodaj Nową Sekcję
                                             </Button>
                                         </Grid>
-                                    </Grid>
-                                ))}
-                                <Grid
-                                    item
-                                    container
-                                    xs={6}
-                                    sx={{ paddingBottom: "40px" }}
-                                >
-                                    <Button
-                                        fullWidth
-                                        type="submit"
-                                        variant="contained"
-                                        size="small"
-                                        sx={{ mb: 2 }}
-                                        onClick={() => setIsAdding(true)}
-                                    >
-                                        Dodaj nowy kontakt
-                                    </Button>
-                                </Grid>
-                            </>
-                        ) : (
-                            <FormControl
-                                component={"form"}
-                                onSubmit={handleSubmit(submitForm)}
-                                disabled={isSubmitting}
-                            >
-                                {contactToEdition && (
-                                    <Typography variant="h4">
-                                        Edytujesz {contactToEdition.name}
-                                    </Typography>
-                                )}
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src={
-                                        contactToEdition
-                                            ? contactToEdition.file
-                                            : "/static/images/avatar/1.jpg"
-                                    }
-                                    sx={{
-                                        width: 156,
-                                        height: 156,
-                                        margin: "auto",
-                                        mb: "30px",
-                                    }}
-                                />
-                                <Controller
-                                    name={"file"}
-                                    control={control}
-                                    render={({ field }) => (
-                                        <MuiFileInput
-                                            inputProps={{
-                                                accept: ".png, .jpeg, .jpg",
-                                            }}
-                                            sx={{ mb: 3 }}
-                                            {...field}
-                                        />
                                     )}
-                                />
-                                <Controller
-                                    name={"name"}
-                                    control={control}
-                                    rules={{
-                                        required: "Podaj imię!",
-                                    }}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Imię"
-                                            variant="outlined"
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.name
-                                                    : ""
-                                            }
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
+                                </>
+                            ) : (
+                                <>
+                                    {mode === OPERATION_MODE.Add ? (
+                                        <>
+                                            {sectionToEdition.id ? (
+                                                // ADD MEMBER
+                                                <>
+                                                    <MemberForm
+                                                        mode={
+                                                            OPERATION_MODE.Edit
+                                                        }
+                                                        section={
+                                                            sectionToEdition
+                                                        }
+                                                        setOpen={setMode}
+                                                        loading={loading}
+                                                        setLoading={setLoading}
+                                                    />
+                                                </>
+                                            ) : (
+                                                // ADD SECTION
+                                                <>
+                                                    <CreateSectionForm
+                                                        mode={
+                                                            OPERATION_MODE.Add
+                                                        }
+                                                        setOpen={setMode}
+                                                        loading={loading}
+                                                        setLoading={setLoading}
+                                                        collection={
+                                                            "management"
+                                                        }
+                                                        sectionPlace={
+                                                            sectionsList.length +
+                                                            1
+                                                        }
+                                                    />
+                                                </>
+                                            )}
+                                        </>
+                                    ) : (
+                                        //EDITION
+                                        <>
+                                            {sectionToEdition &&
+                                            memberToEdition.id >= 0 ? (
+                                                // EDIT MEMBER
+                                                <>
+                                                    <MemberForm
+                                                        mode={
+                                                            OPERATION_MODE.Edit
+                                                        }
+                                                        section={
+                                                            sectionToEdition
+                                                        }
+                                                        member={memberToEdition}
+                                                        setOpen={setMode}
+                                                        loading={loading}
+                                                        setLoading={setLoading}
+                                                    />
+                                                </>
+                                            ) : (
+                                                // EDIT SECTION NAME
+                                                <>
+                                                    <CreateSectionForm
+                                                        mode={
+                                                            OPERATION_MODE.Edit
+                                                        }
+                                                        section={
+                                                            sectionToEdition
+                                                        }
+                                                        setOpen={setMode}
+                                                        loading={loading}
+                                                        collection={
+                                                            "management"
+                                                        }
+                                                        setLoading={setLoading}
+                                                        sectionPlace={
+                                                            sectionToEdition.sectionPlace
+                                                        }
+                                                    />
+                                                </>
+                                            )}
+                                        </>
                                     )}
-                                />
-                                <Controller
-                                    name={"descriptionPL"}
-                                    control={control}
-                                    rules={{
-                                        required: "Podaj opis!",
-                                    }}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Opis PL"
-                                            variant="outlined"
-                                            multiline
-                                            rows={3}
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.descriptionPL
-                                                    : ""
-                                            }
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name={"descriptionENG"}
-                                    control={control}
-                                    rules={{
-                                        required: "Podaj opis ENG",
-                                    }}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Opis ENG"
-                                            multiline
-                                            rows={3}
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.descriptionENG
-                                                    : ""
-                                            }
-                                            variant="outlined"
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name={"phone"}
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Telefon"
-                                            variant="outlined"
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.phone
-                                                    : ""
-                                            }
-                                            autoComplete="username"
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name={"email"}
-                                    control={control}
-                                    rules={{
-                                        required: "Podaj email!",
-                                    }}
-                                    render={({ field }) => (
-                                        <TextField
-                                            label="Email"
-                                            variant="outlined"
-                                            defaultValue={
-                                                contactToEdition
-                                                    ? contactToEdition.email
-                                                    : ""
-                                            }
-                                            size="small"
-                                            type="text"
-                                            error={Boolean(errors[field.name])}
-                                            helperText={
-                                                errors[field.name]?.message
-                                            }
-                                            fullWidth
-                                            sx={{ mb: 3 }}
-                                        />
-                                    )}
-                                />
-                                <Grid
-                                    container
-                                    direction="row"
-                                    spacing={1}
-                                    sx={{ mt: 5 }}
-                                >
-                                    <Grid item xs={6}>
-                                        <Button
-                                            fullWidth
-                                            type="submit"
-                                            variant="outlined"
-                                            size="small"
-                                            color="error"
-                                            disabled={isSubmitting}
-                                        >
-                                            Zapisz zmiany
-                                        </Button>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Button
-                                            fullWidth
-                                            variant="contained"
-                                            size="small"
-                                            color="error"
-                                            onClick={() => closeAdminPanel()}
-                                        >
-                                            Anuluj
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </FormControl>
-                        )}
-                    </Grid>
+                                </>
+                            )}
+                        </Grid>
+                    )}
                 </Grid>
             </Paper>
         </Grid>

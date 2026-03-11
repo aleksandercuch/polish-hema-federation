@@ -1,0 +1,57 @@
+import { RawDraftContentState } from "react-draft-wysiwyg";
+
+export interface memberParams {
+    name: string;
+    descriptionENG: string;
+    descriptionPL: string;
+    file: string | File;
+    id: number;
+}
+
+export interface contactParams {
+    id: string;
+    name: string;
+    descriptionENG: string;
+    descriptionPL: string;
+    file: string | File;
+    phone: string;
+    email: string;
+}
+
+export interface requestSectionParams {
+    namePL: string;
+    nameENG: string;
+    descriptionEng?: string | RawDraftContentState;
+    descriptionPl?: string | RawDraftContentState;
+    members: memberParams[] | string[];
+    sectionPlace: number;
+}
+export interface sectionParams extends requestSectionParams {
+    id: string;
+}
+
+export const defaultSection = {
+    id: "",
+    namePL: "",
+    nameENG: "",
+    members: [],
+    sectionPlace: 100,
+};
+
+export const defaultMember = {
+    name: "",
+    descriptionENG: "",
+    descriptionPL: "",
+    file: "",
+    id: -1,
+};
+
+export const defaultContact = {
+    id: "",
+    name: "",
+    descriptionENG: "",
+    descriptionPL: "",
+    file: "",
+    phone: "",
+    email: "",
+};

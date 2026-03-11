@@ -1,6 +1,12 @@
 "use client";
 // CORE
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 
 // API
 import {
@@ -20,9 +26,13 @@ interface CreateContextProps {
     logout: () => Promise<void>;
 }
 
+interface AuthContextProviderProps {
+    children: ReactNode;
+}
+
 const UserContext = createContext<CreateContextProps | null>(null);
 
-export const AuthContextProvider = ({ children }: any) => {
+export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     const [user, setUser] = useState<User | null>(null);
 
     const createUser = (email: string, password: string) => {
@@ -40,7 +50,7 @@ export const AuthContextProvider = ({ children }: any) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            currentUser && setUser(currentUser);
+            setUser(currentUser);
         });
         return () => {
             unsubscribe();

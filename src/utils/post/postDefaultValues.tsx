@@ -6,7 +6,7 @@ export const defaultPostValues = {
     introPL: "",
     descriptionENG: "",
     descriptionPL: "",
-    visible: false,
     mainFile: "",
+    images: [],
     date: new Date(),
 };

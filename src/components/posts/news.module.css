@@ -1,0 +1,14 @@
+.news {
+    position: relative;
+    z-index: 2;
+}
+
+.news a {
+    width: 100%;
+}
+
+.postsButton {
+    height: 75px;
+    color: white;
+    border: 1px solid black;
+}

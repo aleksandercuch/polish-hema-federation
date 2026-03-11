@@ -5,6 +5,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 // MATERIAL
 import AppBar from "@mui/material/AppBar";
@@ -19,9 +20,11 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import styles from "./navbar.module.css";
+import colors from "@/utils/constants/colors";
 
 // COMPONENTS
 import { ChangeLanguageFlag } from "./ChangeLanguageFlag";
+import { useEffect } from "react";
 
 interface NavLinkParams {
     name: string;
@@ -30,57 +33,69 @@ interface NavLinkParams {
     ref?: string;
 }
 
-const navLinks: NavLinkParams[] = [
-    {
-        name: "News",
-        isReflink: true,
-        url: "/",
-        ref: "NewsHome",
-    },
-    {
-        name: "Schedule",
-        isReflink: true,
-        url: "/",
-
-        ref: "Schedule",
-    },
-    {
-        name: "Rules",
-        isReflink: false,
-        url: "/rules",
-    },
-    {
-        name: "Management",
-        isReflink: false,
-        url: "/management",
-    },
-    {
-        name: "Contact",
-        isReflink: false,
-        url: "/contact",
-    },
-    {
-        name: "Gallery",
-        isReflink: false,
-        url: "/gallery",
-    },
-    {
-        name: "Clubs",
-        isReflink: true,
-        url: "/",
-
-        ref: "OpenLayersMap",
-    },
-];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
-
 export const ResponsiveAppBar = () => {
+    const t = useTranslations("NAVBAR");
+    const [currentLocale, setCurrentLocale] = React.useState("");
+    const navLinks: NavLinkParams[] = [
+        {
+            name: t("news"),
+            isReflink: true,
+            url: `/${currentLocale}`,
+            ref: "NewsHome",
+        },
+        {
+            name: t("schedule"),
+            isReflink: true,
+            url: `/${currentLocale}`,
+            ref: "Schedule",
+        },
+        {
+            name: t("articles"),
+            isReflink: true,
+            url: `/${currentLocale}`,
+            ref: "Articles",
+        },
+        {
+            name: t("rules"),
+            isReflink: false,
+            url: `/${currentLocale}/rules`,
+        },
+        {
+            name: t("management"),
+            isReflink: false,
+            url: `/${currentLocale}/management`,
+        },
+        {
+            name: t("contact"),
+            isReflink: false,
+            url: `/${currentLocale}/contact`,
+        },
+        {
+            name: t("gallery"),
+            isReflink: false,
+            url: `/${currentLocale}/gallery`,
+        },
+        {
+            name: t("judges"),
+            isReflink: false,
+            url: `/${currentLocale}/judges`,
+        },
+        {
+            name: t("cooperation"),
+            isReflink: false,
+            url: `/${currentLocale}/cooperation`,
+        },
+        {
+            name: t("clubs"),
+            isReflink: true,
+            url: `/${currentLocale}`,
+
+            ref: "OpenLayersMap",
+        },
+    ];
     const pathname = usePathname();
     const router = useRouter();
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-        null
-    );
-    const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
         null
     );
 
@@ -102,7 +117,7 @@ export const ResponsiveAppBar = () => {
                 await router.push(link.url);
 
                 const intervalId = setInterval(() => {
-                    const element = document.getElementById(link.ref);
+                    const element = document.getElementById(link.ref as string);
                     if (element) {
                         element.scrollIntoView({ behavior: "smooth" });
                         clearInterval(intervalId);
@@ -115,18 +130,24 @@ export const ResponsiveAppBar = () => {
         handleCloseNavMenu();
     };
 
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const locale = window.location.pathname.split("/")[1];
+            setCurrentLocale(locale);
+        }
+    }, []);
     return (
         <AppBar
             position="fixed"
-            sx={{ backgroundColor: "white", color: "black" }}
+            sx={{ backgroundColor: `${colors.white}`, color: "black" }}
         >
-            <Container maxWidth="false">
+            <Container maxWidth={false}>
                 <Toolbar disableGutters>
-                    <Link href="/">
+                    <Link href={`/${currentLocale}`}>
                         <Image
-                            src="/logo.jpg"
+                            src="https://firebasestorage.googleapis.com/v0/b/polish-hema-federation.firebasestorage.app/o/NewLogo.png?alt=media&token=4e46d858-5a34-4b28-a58c-def60ec3fa2b"
                             alt="Example image"
-                            width={150}
+                            width={100}
                             height={100}
                             priority
                         />
@@ -222,7 +243,7 @@ export const ResponsiveAppBar = () => {
                             }}
                         >
                             <a
-                                href="https://www.facebook.com/FederPoland"
+                                href="https://www.facebook.com/profile.php?id=61574558300859"
                                 target="_blank"
                             >
                                 <FacebookIcon className={styles.mediaIcon} />

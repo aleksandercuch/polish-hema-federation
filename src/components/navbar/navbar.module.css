@@ -1,10 +1,11 @@
 .flagIcon {
     width: 2rem;
     height: 2rem;
+    cursor: pointer;
 }
 
 .mediaIcon {
-    width: 2rem;
+    width: 2rem !important;
     margin: 0 3px;
-    height: 2rem;
+    height: 2rem !important;
 }
