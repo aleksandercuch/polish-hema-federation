@@ -36,10 +36,10 @@ interface pageParams {
 
 const TextEditorComponent = (props: pageParams) => {
     const [editorStatePL, setEditorStatePL] = useState(
-        EditorState.createEmpty()
+        EditorState.createEmpty(),
     );
     const [editorStateENG, setEditorStateENG] = useState(
-        EditorState.createEmpty()
+        EditorState.createEmpty(),
     );
     const [elements, setElements] = useState<editorParams | null>();
     const [isEditing, setIsEditing] = useState(false);
@@ -99,13 +99,13 @@ const TextEditorComponent = (props: pageParams) => {
 
         setEditorStatePL(
             EditorState.createWithContent(
-                convertFromRaw(elements.descriptionPL as RawDraftContentState)
-            )
+                convertFromRaw(elements.descriptionPL as RawDraftContentState),
+            ),
         );
         setEditorStateENG(
             EditorState.createWithContent(
-                convertFromRaw(elements.descriptionENG as RawDraftContentState)
-            )
+                convertFromRaw(elements.descriptionENG as RawDraftContentState),
+            ),
         );
     }, [elements]);
 
@@ -159,13 +159,13 @@ const TextEditorComponent = (props: pageParams) => {
                                         wrapperClassName="wrapperClassName"
                                         editorClassName="editorClassName"
                                         onEditorStateChange={(
-                                            newEditorState
+                                            newEditorState,
                                         ) => {
                                             setEditorStatePL(newEditorState); // Update local state
                                             field.onChange(
                                                 convertToRaw(
-                                                    newEditorState.getCurrentContent()
-                                                )
+                                                    newEditorState.getCurrentContent(),
+                                                ),
                                             ); // Sync with react-hook-form
                                         }}
                                     />
@@ -185,13 +185,13 @@ const TextEditorComponent = (props: pageParams) => {
                                         wrapperClassName="wrapperClassName"
                                         editorClassName="editorClassName"
                                         onEditorStateChange={(
-                                            newEditorState
+                                            newEditorState,
                                         ) => {
                                             setEditorStateENG(newEditorState); // Update local state
                                             field.onChange(
                                                 convertToRaw(
-                                                    newEditorState.getCurrentContent()
-                                                )
+                                                    newEditorState.getCurrentContent(),
+                                                ),
                                             ); // Sync with react-hook-form
                                         }}
                                     />
@@ -238,7 +238,7 @@ const TextEditorComponent = (props: pageParams) => {
                         __html: convertDraftToHtmlWithEmptyBlocks(
                             currentLocale == "pl"
                                 ? (elements.descriptionPL as RawDraftContentState)
-                                : (elements.descriptionENG as RawDraftContentState)
+                                : (elements.descriptionENG as RawDraftContentState),
                         ),
                     }}
                 />

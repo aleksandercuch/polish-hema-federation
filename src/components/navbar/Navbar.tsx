@@ -61,6 +61,11 @@ export const ResponsiveAppBar = () => {
             url: `/${currentLocale}/rules`,
         },
         {
+            name: t("about"),
+            isReflink: false,
+            url: `/${currentLocale}/about`,
+        },
+        {
             name: t("management"),
             isReflink: false,
             url: `/${currentLocale}/management`,
@@ -96,7 +101,7 @@ export const ResponsiveAppBar = () => {
     const pathname = usePathname();
     const router = useRouter();
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-        null
+        null,
     );
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
