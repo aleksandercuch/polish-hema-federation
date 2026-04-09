@@ -58,7 +58,7 @@ const Article = () => {
         if (!post?.id) return;
 
         const confirmDelete = window.confirm(
-            "Czy na pewno chcesz usunąć ten post?"
+            "Czy na pewno chcesz usunąć ten post?",
         );
         if (!confirmDelete) return;
 
@@ -74,11 +74,11 @@ const Article = () => {
                     post.images.map(async (imageUrl) => {
                         if (await fileExists(imageUrl as string)) {
                             await deleteObject(
-                                ref(storage, imageUrl as string)
+                                ref(storage, imageUrl as string),
                             );
                             console.log("Image deleted:", imageUrl);
                         }
-                    })
+                    }),
                 );
             }
 
@@ -207,8 +207,8 @@ const Article = () => {
                                             <Typography variant="body1">
                                                 {dayjs(
                                                     convertFirebaseTimestamp(
-                                                        post.date as Timestamp
-                                                    )
+                                                        post.date as Timestamp,
+                                                    ),
                                                 ).format("DD/MM/YYYY")}
                                             </Typography>
                                         </Grid>
@@ -263,11 +263,14 @@ const Article = () => {
                                     {post.descriptionPL && (
                                         <Grid item container>
                                             <div
+                                                className={
+                                                    styles.articleContent
+                                                }
                                                 dangerouslySetInnerHTML={{
                                                     __html: convertDraftToHtmlWithEmptyBlocks(
                                                         currentLocale == "pl"
                                                             ? (post.descriptionPL as RawDraftContentState)
-                                                            : (post.descriptionENG as RawDraftContentState)
+                                                            : (post.descriptionENG as RawDraftContentState),
                                                     ),
                                                 }}
                                             />
@@ -281,7 +284,7 @@ const Article = () => {
                                         >
                                             <ImageGallery
                                                 items={convertImagesToGallery(
-                                                    post.images as string[]
+                                                    post.images as string[],
                                                 )}
                                                 showFullscreenButton={true}
                                                 startIndex={1}

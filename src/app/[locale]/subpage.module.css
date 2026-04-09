@@ -2,6 +2,11 @@
     justify-content: center;
 }
 
+.articleContent img {
+    max-width: 100%;
+    height: auto;
+}
+
 .subpageBackground {
     z-index: 10;
     position: relative;
