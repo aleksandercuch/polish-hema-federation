@@ -155,7 +155,7 @@ const Article = () => {
                 }}
             >
                 <Paper>
-                    <Link href={`/${currentLocale}/posts`}>
+                    <Link href={`/${currentLocale}/articles`}>
                         <Button
                             sx={{
                                 width: {
