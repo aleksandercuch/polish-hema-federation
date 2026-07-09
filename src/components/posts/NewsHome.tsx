@@ -35,7 +35,11 @@ import { usePost } from "@/contexts/PostsContext";
 
 // UTILS
 import colors from "@/utils/constants/colors";
-import { truncateText } from "@/utils/functions/TruncateText";
+
+const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength).trim() + "...";
+};
 
 export const NewsHome = () => {
     const [posts, setPosts] = useState<PostT[]>([]);
@@ -57,7 +61,7 @@ export const NewsHome = () => {
             const q = query(
                 collection(db, "posts"),
                 orderBy("date", "desc"),
-                limit(6)
+                limit(6),
             );
 
             const snapshot = await getDocs(q);
@@ -172,13 +176,13 @@ export const NewsHome = () => {
                                                     color={
                                                         !isSmallScreen
                                                             ? isReversedPost(
-                                                                  index
+                                                                  index,
                                                               )
                                                                 ? "secondary"
                                                                 : "error"
                                                             : index % 2 == 0
-                                                            ? "error"
-                                                            : "secondary"
+                                                              ? "error"
+                                                              : "secondary"
                                                     }
                                                 >
                                                     {currentLocale == "pl"
@@ -200,24 +204,24 @@ export const NewsHome = () => {
                                                         sx={{
                                                             color: !isSmallScreen
                                                                 ? isReversedPost(
-                                                                      index
+                                                                      index,
                                                                   )
                                                                     ? `${colors.white}`
                                                                     : "text.secondary"
                                                                 : index % 2 == 0
-                                                                ? "text.secondary"
-                                                                : `${colors.white}`,
+                                                                  ? "text.secondary"
+                                                                  : `${colors.white}`,
                                                             maxWidth: "250px",
                                                         }}
                                                     >
                                                         {currentLocale == "pl"
                                                             ? truncateText(
                                                                   post.introPL,
-                                                                  100
+                                                                  100,
                                                               )
                                                             : truncateText(
                                                                   post.introENG,
-                                                                  100
+                                                                  100,
                                                               )}
                                                     </Typography>
                                                 </Grid>
@@ -227,17 +231,17 @@ export const NewsHome = () => {
                                                         color={
                                                             !isSmallScreen
                                                                 ? isReversedPost(
-                                                                      index
+                                                                      index,
                                                                   )
                                                                     ? "secondary"
                                                                     : "error"
                                                                 : index % 2 == 0
-                                                                ? "error"
-                                                                : "secondary"
+                                                                  ? "error"
+                                                                  : "secondary"
                                                         }
                                                         onClick={() =>
                                                             handleNavigation(
-                                                                post
+                                                                post,
                                                             )
                                                         }
                                                     >
