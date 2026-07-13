@@ -59,7 +59,7 @@ const ListOfPosts = () => {
     const t = useTranslations("COMMON");
     const currentLocale = window.location.pathname.split("/")[1];
     const fetchPosts = useCallback(
-        async (reset = false) => {
+        async (reset = false, isCancelled: () => boolean = () => false) => {
             if (reset) {
                 setLoading(true);
             } else {
@@ -70,7 +70,7 @@ const ListOfPosts = () => {
                 let q = query(
                     collection(db, "posts"),
                     orderBy("date", "desc"),
-                    orderBy("__name__", "desc"), // 👈 add this
+                    orderBy("__name__", "desc"),
                     limit(POSTS_PER_PAGE),
                 );
 
@@ -78,13 +78,16 @@ const ListOfPosts = () => {
                     q = query(
                         collection(db, "posts"),
                         orderBy("date", "desc"),
-                        orderBy("__name__", "desc"), // 👈 add this
+                        orderBy("__name__", "desc"),
                         startAfter(lastDoc.data().date, lastDoc.id),
                         limit(POSTS_PER_PAGE),
                     );
                 }
 
                 const snapshot = await getDocs(q);
+
+                // Component was unmounted or navigation happened
+                if (isCancelled()) return;
 
                 if (!snapshot.empty) {
                     const newPosts = snapshot.docs.map((doc) => ({
@@ -95,18 +98,23 @@ const ListOfPosts = () => {
                     setPosts((prev) =>
                         reset ? newPosts : [...prev, ...newPosts],
                     );
+
                     setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
                     setHasMore(snapshot.docs.length === POSTS_PER_PAGE);
                 } else {
                     setHasMore(false);
                 }
             } catch (error) {
-                console.error("Error fetching posts:", error);
+                if (!isCancelled()) {
+                    console.error("Error fetching posts:", error);
+                }
             } finally {
-                if (reset) {
-                    setLoading(false);
-                } else {
-                    setLoadingMore(false);
+                if (!isCancelled()) {
+                    if (reset) {
+                        setLoading(false);
+                    } else {
+                        setLoadingMore(false);
+                    }
                 }
             }
         },
@@ -119,8 +127,14 @@ const ListOfPosts = () => {
     };
 
     useEffect(() => {
-        fetchPosts(true);
-    }, []);
+        let cancelled = false;
+
+        fetchPosts(true, () => cancelled);
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchPosts]);
 
     return (
         <Grid container className={styles.mainContainer}>
