@@ -1,7 +1,7 @@
 "use client";
 
 // CORE
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -56,7 +56,7 @@ export const ArticlesHome = () => {
         setPost(post);
         router.push(`${currentLocale}/articles/${post.id}`);
     };
-    const fetchPosts = async () => {
+    const fetchPosts = useCallback(async (isCancelled: () => boolean) => {
         try {
             const q = query(
                 collection(db, "articles"),
@@ -66,6 +66,8 @@ export const ArticlesHome = () => {
 
             const snapshot = await getDocs(q);
 
+            if (isCancelled()) return;
+
             const newPosts = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
@@ -73,9 +75,11 @@ export const ArticlesHome = () => {
 
             setPosts(newPosts);
         } catch (error) {
-            console.error("Error fetching posts:", error);
+            if (!isCancelled()) {
+                console.error("Error fetching posts:", error);
+            }
         }
-    };
+    }, []);
 
     const colorTheme = createTheme({
         palette: {
@@ -86,12 +90,19 @@ export const ArticlesHome = () => {
     });
 
     useEffect(() => {
-        fetchPosts();
+        let cancelled = false;
+
+        fetchPosts(() => cancelled);
+
         if (typeof window !== "undefined") {
             const locale = window.location.pathname.split("/")[1];
             setCurrentLocale(locale);
         }
-    }, []);
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchPosts]);
 
     return (
         <Grid
