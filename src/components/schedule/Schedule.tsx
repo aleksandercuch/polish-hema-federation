@@ -2,7 +2,6 @@
 
 // CORE
 import { useEffect, useState } from "react";
-import dayjs from "dayjs";
 
 // ASSETS
 import Card from "@mui/material/Card";
@@ -87,7 +86,7 @@ export const Schedule = () => {
                     >
                         <Grid item>
                             <Typography component="div" variant="h5">
-                                Harmonogram {dayjs(new Date()).format("YYYY")}
+                                Harmonogram
                             </Typography>
                         </Grid>
                         {!editMode ? (
