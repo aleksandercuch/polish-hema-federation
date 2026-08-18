@@ -49,6 +49,7 @@ const POSTS_PER_PAGE = 10;
 const ListOfPosts = () => {
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState<PostT[]>([]);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null);
     const [hasMore, setHasMore] = useState(true);
     const [addPostModeActive, setAddPostModeActive] = useState(false);
@@ -58,26 +59,35 @@ const ListOfPosts = () => {
     const t = useTranslations("COMMON");
     const currentLocale = window.location.pathname.split("/")[1];
     const fetchPosts = useCallback(
-        async (reset = false) => {
-            setLoading(true);
+        async (reset = false, isCancelled: () => boolean = () => false) => {
+            if (reset) {
+                setLoading(true);
+            } else {
+                setLoadingMore(true);
+            }
 
             try {
                 let q = query(
                     collection(db, "posts"),
                     orderBy("date", "desc"),
-                    limit(POSTS_PER_PAGE)
+                    orderBy("__name__", "desc"),
+                    limit(POSTS_PER_PAGE),
                 );
 
                 if (!reset && lastDoc) {
                     q = query(
                         collection(db, "posts"),
                         orderBy("date", "desc"),
-                        startAfter(lastDoc),
-                        limit(POSTS_PER_PAGE)
+                        orderBy("__name__", "desc"),
+                        startAfter(lastDoc.data().date, lastDoc.id),
+                        limit(POSTS_PER_PAGE),
                     );
                 }
 
                 const snapshot = await getDocs(q);
+
+                // Component was unmounted or navigation happened
+                if (isCancelled()) return;
 
                 if (!snapshot.empty) {
                     const newPosts = snapshot.docs.map((doc) => ({
@@ -86,20 +96,29 @@ const ListOfPosts = () => {
                     })) as PostT[];
 
                     setPosts((prev) =>
-                        reset ? newPosts : [...prev, ...newPosts]
+                        reset ? newPosts : [...prev, ...newPosts],
                     );
+
                     setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
                     setHasMore(snapshot.docs.length === POSTS_PER_PAGE);
                 } else {
                     setHasMore(false);
                 }
             } catch (error) {
-                console.error("Error fetching posts:", error);
+                if (!isCancelled()) {
+                    console.error("Error fetching posts:", error);
+                }
             } finally {
-                setLoading(false);
+                if (!isCancelled()) {
+                    if (reset) {
+                        setLoading(false);
+                    } else {
+                        setLoadingMore(false);
+                    }
+                }
             }
         },
-        [lastDoc, setLoading, setPosts, setLastDoc, setHasMore]
+        [lastDoc],
     );
 
     const handleNavigation = (post: PostT) => {
@@ -108,7 +127,13 @@ const ListOfPosts = () => {
     };
 
     useEffect(() => {
-        fetchPosts(true);
+        let cancelled = false;
+
+        fetchPosts(true, () => cancelled);
+
+        return () => {
+            cancelled = true;
+        };
     }, [fetchPosts]);
 
     return (
@@ -174,10 +199,10 @@ const ListOfPosts = () => {
                             <>
                                 {!loading || posts.length > 0 ? (
                                     <>
-                                        {posts.map((post, index) => (
+                                        {posts.map((post) => (
                                             <Grid
                                                 item
-                                                key={index}
+                                                key={post.id}
                                                 xs={12}
                                                 sx={{
                                                     width: "100%",
@@ -255,12 +280,12 @@ const ListOfPosts = () => {
                                                                             color="error"
                                                                             onClick={() =>
                                                                                 handleNavigation(
-                                                                                    post
+                                                                                    post,
                                                                                 )
                                                                             }
                                                                         >
                                                                             {t(
-                                                                                "show-more"
+                                                                                "show-more",
                                                                             )}
                                                                         </Button>
                                                                     </Grid>
@@ -311,9 +336,9 @@ const ListOfPosts = () => {
                                             variant="outlined"
                                             color="error"
                                             onClick={() => fetchPosts(false)}
-                                            disabled={loading}
+                                            disabled={loadingMore}
                                         >
-                                            {loading
+                                            {loadingMore
                                                 ? "Loading..."
                                                 : "Load More"}
                                         </Button>

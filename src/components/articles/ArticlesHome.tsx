@@ -1,7 +1,7 @@
 "use client";
 
 // CORE
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -35,7 +35,11 @@ import { usePost } from "@/contexts/PostsContext";
 
 // UTILS
 import colors from "@/utils/constants/colors";
-import { truncateText } from "@/utils/functions/TruncateText";
+
+const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength).trim() + "...";
+};
 
 export const ArticlesHome = () => {
     const [posts, setPosts] = useState<PostT[]>([]);
@@ -52,15 +56,17 @@ export const ArticlesHome = () => {
         setPost(post);
         router.push(`${currentLocale}/articles/${post.id}`);
     };
-    const fetchPosts = async () => {
+    const fetchPosts = useCallback(async (isCancelled: () => boolean) => {
         try {
             const q = query(
                 collection(db, "articles"),
                 orderBy("date", "desc"),
-                limit(6)
+                limit(6),
             );
 
             const snapshot = await getDocs(q);
+
+            if (isCancelled()) return;
 
             const newPosts = snapshot.docs.map((doc) => ({
                 id: doc.id,
@@ -69,9 +75,11 @@ export const ArticlesHome = () => {
 
             setPosts(newPosts);
         } catch (error) {
-            console.error("Error fetching posts:", error);
+            if (!isCancelled()) {
+                console.error("Error fetching posts:", error);
+            }
         }
-    };
+    }, []);
 
     const colorTheme = createTheme({
         palette: {
@@ -82,12 +90,19 @@ export const ArticlesHome = () => {
     });
 
     useEffect(() => {
-        fetchPosts();
+        let cancelled = false;
+
+        fetchPosts(() => cancelled);
+
         if (typeof window !== "undefined") {
             const locale = window.location.pathname.split("/")[1];
             setCurrentLocale(locale);
         }
-    }, []);
+
+        return () => {
+            cancelled = true;
+        };
+    }, [fetchPosts]);
 
     return (
         <Grid
@@ -112,7 +127,7 @@ export const ArticlesHome = () => {
                             marginBottom: "-60px",
                             zIndex: "100",
                             alignContent: "center",
-
+                            display: { xs: "none", sm: "block" },
                             fontWeight: "500",
                             fontSize: "0.875rem",
                         }}
@@ -190,13 +205,13 @@ export const ArticlesHome = () => {
                                                         color={
                                                             !isSmallScreen
                                                                 ? isReversedPost(
-                                                                      index
+                                                                      index,
                                                                   )
                                                                     ? "secondary"
                                                                     : "error"
                                                                 : index % 2 == 0
-                                                                ? "error"
-                                                                : "secondary"
+                                                                  ? "error"
+                                                                  : "secondary"
                                                         }
                                                     >
                                                         {currentLocale == "pl"
@@ -218,15 +233,15 @@ export const ArticlesHome = () => {
                                                             sx={{
                                                                 color: !isSmallScreen
                                                                     ? isReversedPost(
-                                                                          index
+                                                                          index,
                                                                       )
                                                                         ? `${colors.white}`
                                                                         : "text.secondary"
                                                                     : index %
-                                                                          2 ==
-                                                                      0
-                                                                    ? "text.secondary"
-                                                                    : `${colors.white}`,
+                                                                            2 ==
+                                                                        0
+                                                                      ? "text.secondary"
+                                                                      : `${colors.white}`,
                                                                 maxWidth:
                                                                     "250px",
                                                             }}
@@ -235,11 +250,11 @@ export const ArticlesHome = () => {
                                                             "pl"
                                                                 ? truncateText(
                                                                       post.introPL,
-                                                                      100
+                                                                      100,
                                                                   )
                                                                 : truncateText(
                                                                       post.introENG,
-                                                                      100
+                                                                      100,
                                                                   )}
                                                         </Typography>
                                                     </Grid>
@@ -249,19 +264,19 @@ export const ArticlesHome = () => {
                                                             color={
                                                                 !isSmallScreen
                                                                     ? isReversedPost(
-                                                                          index
+                                                                          index,
                                                                       )
                                                                         ? "secondary"
                                                                         : "error"
                                                                     : index %
-                                                                          2 ==
-                                                                      0
-                                                                    ? "error"
-                                                                    : "secondary"
+                                                                            2 ==
+                                                                        0
+                                                                      ? "error"
+                                                                      : "secondary"
                                                             }
                                                             onClick={() =>
                                                                 handleNavigation(
-                                                                    post
+                                                                    post,
                                                                 )
                                                             }
                                                         >

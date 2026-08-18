@@ -8,8 +8,11 @@
         "contact": "Contact",
         "gallery": "Gallery",
         "judges": "Judges",
+        "about": "About",
         "cooperation": "Cooperation",
-        "clubs": "Clubs"
+        "clubs": "Clubs",
+        "show-gallery": "Show Gallery",
+        "return-gallery": "Show all galleries"
     },
     "COMMON": {
         "show-more": "Show More",

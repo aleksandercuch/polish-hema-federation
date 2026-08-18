@@ -8,8 +8,11 @@
         "contact": "Kontakt",
         "gallery": "Galeria",
         "judges": "Sędziowie",
+        "about": "O Nas",
         "cooperation": "Współpraca",
-        "clubs": "Kluby"
+        "clubs": "Kluby",
+        "show-gallery": "Wyświetl",
+        "return-gallery": "Pokaż wszystkie galerie"
     },
     "COMMON": {
         "show-more": "Pokaż więcej",
